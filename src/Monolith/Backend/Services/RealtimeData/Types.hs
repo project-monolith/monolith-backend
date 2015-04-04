@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, OverloadedStrings #-}
 
 -- | This module contains the types and instances that pertain directly to
 -- the data served up by the REST API. They do not apply outside of that
@@ -34,25 +34,25 @@ import qualified Data.Aeson.TH as J
 -- We use `Set`s here so that there's no possibility for things to get
 -- out of order. The correct ordering is important.
 data Stop = Stop
-  { stopId :: Int
+  { stopId :: T.Text
   , stopDesc :: T.Text
-  , stopRoutes :: S.Set Route
+  , stopRoutes :: [Route]
   , stopTimestamp :: Int
   } deriving Show
 
 data Route = Route
-  { routeNumber :: Int
-  , routeHeadsign :: T.Text
+  { routeId :: T.Text
+  , routeNumber :: T.Text
   , routeDesc :: T.Text
   , routeTrips :: S.Set Trip
-  } deriving (Eq, Show)
-
-instance Ord Route where
-  (Route _ _ _ ts1) `compare` (Route _ _ _ ts2) = ts1 `compare` ts2
+  } deriving (Eq, Ord, Show)
 
 data Trip = Trip
-  { tripWait :: Int -- seconds
+  { tripArrival :: Int -- timestamp
+  , tripId :: T.Text
+  , tripRouteId :: T.Text
   , tripWaitSource :: WaitSource
+  , tripHeadSign :: T.Text
   } deriving (Eq, Ord, Show)
 
 data WaitSource = Realtime | Scheduled deriving (Eq, Ord, Show)

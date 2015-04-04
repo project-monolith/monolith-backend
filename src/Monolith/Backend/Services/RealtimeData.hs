@@ -15,17 +15,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
+{-# LANGUAGE DeriveDataTypeable #-}
+
 -- | This is the interface for modules that provide realtime transit service
 -- information to other services.
 module Monolith.Backend.Services.RealtimeData
   ( Handle(..)
+  , RealtimeDataException(..)
   , StopID
   ) where
 
+import Control.Exception
+import Data.Typeable
 import qualified Data.Text as T
 import Monolith.Backend.Services.RealtimeData.Types
+
+-- | General-purpose exception to throw when something goes wrong fetching
+-- real-time data.
+data RealtimeDataException = RealtimeDataException String deriving (Show, Typeable)
+instance Exception RealtimeDataException
 
 type StopID = T.Text
 
 newtype Handle = Handle
-  { incomingTripsForStop :: StopID -> Int -> IO Stop }
+  { incomingTripsForStop :: StopID -> IO Stop }
