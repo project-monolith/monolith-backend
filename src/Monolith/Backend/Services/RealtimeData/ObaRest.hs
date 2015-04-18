@@ -88,6 +88,13 @@ instance FromJSON ObaStop where
 
     -- extract the sub-objects of interest; this is really ugly and there must be
     -- a better way?
+
+{-  
+    baseData <- getAttr "data" o
+    tripsValue <- getAttr "arrivalsAndDepartures" =<< getAttr "entry" baseData 
+    routesValue <- getAttr "routes" =<< getAttr "references" baseData
+-}
+
     let maybeData = jsonObjectLookup "data" v
 
         maybeTripsValue = do
@@ -119,16 +126,23 @@ instance FromJSON ObaStop where
 
     return $ ObaStop $ RDT.Stop "foo" "bar" routesWithNotNullTrips timestamp
 
+getAttr :: T.Text -> Object -> Parser Object
+getAttr key object = do
+  value <- object .: key :: Parser Value
+  getObject value
+
+getObject :: Value -> Parser Object
+getObject (Object o) = return o
+getObject _ = empty
+
 jsonObjectLookup :: T.Text -> Value -> Maybe Value
 jsonObjectLookup key (Object o) = HM.lookup key o
 jsonObjectLookup key _ = Nothing
     
 -- * Get a new handle
 
-newHandle :: ObaRestConfig -> IO RD.Handle
-newHandle config = return handle
-  where
-    handle = RD.Handle $ incomingTripsForStop' config
+newHandle :: ObaRestConfig -> RD.Handle
+newHandle config = RD.Handle $ incomingTripsForStop' config
 
 incomingTripsForStop' :: ObaRestConfig -> RD.StopID -> IO RDT.Stop
 incomingTripsForStop' config stopId = do
