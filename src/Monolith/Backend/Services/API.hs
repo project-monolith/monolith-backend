@@ -17,25 +17,12 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Main 
-  ( main
+module Monolith.Backend.Services.API
+  ( Handle(..)
   ) where
 
-import System.Environment
-import Control.Concurrent.Async
-import qualified Data.Text as T
-import qualified Data.ByteString.Lazy as B
-import Data.Aeson (encode)
-import qualified Monolith.Backend.Services.RealtimeData as RD
-import qualified Monolith.Backend.Services.RealtimeData.ObaRest as OBA
-import qualified Monolith.Backend.Services.API as API
-import qualified Monolith.Backend.Services.API.Scotty as SCTY
+import Control.Concurrent.Async (Async)
 
-config :: OBA.ObaRestConfig
-config = OBA.ObaRestConfig "TEST" "http://api.pugetsound.onebusaway.org/api/where/"
-
-main :: IO ()
-main = do
-  let obaHandle = OBA.newHandle config
-  API.Handle async <- SCTY.getHandle obaHandle 4567
-  wait async
+-- | Handle to the web server. Currently this just holds
+-- the async handle of the thread that's running the server.
+newtype Handle = Handle { getAsync :: Async () }

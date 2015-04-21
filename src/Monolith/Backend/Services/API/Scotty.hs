@@ -17,25 +17,25 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Main 
-  ( main
+module Monolith.Backend.Services.API.Scotty
+  ( getHandle
   ) where
 
-import System.Environment
+import Control.Applicative
+import Control.Monad.IO.Class
 import Control.Concurrent.Async
-import qualified Data.Text as T
-import qualified Data.ByteString.Lazy as B
-import Data.Aeson (encode)
+import Web.Scotty
+import Network.Wai.Handler.Warp (Port)
+import Monolith.Backend.Services.API
 import qualified Monolith.Backend.Services.RealtimeData as RD
-import qualified Monolith.Backend.Services.RealtimeData.ObaRest as OBA
-import qualified Monolith.Backend.Services.API as API
-import qualified Monolith.Backend.Services.API.Scotty as SCTY
 
-config :: OBA.ObaRestConfig
-config = OBA.ObaRestConfig "TEST" "http://api.pugetsound.onebusaway.org/api/where/"
-
-main :: IO ()
-main = do
-  let obaHandle = OBA.newHandle config
-  API.Handle async <- SCTY.getHandle obaHandle 4567
-  wait async
+getHandle :: RD.Handle -> Port -> IO Handle
+getHandle dataService port = Handle <$> async (scotty port (app dataService))
+  
+app :: RD.Handle -> ScottyM ()
+app dataService = do
+  
+  get "/stops/:stop_id/trips" $ do
+    stopId <- param "stop_id"
+    stop <- liftIO $ RD.incomingTripsForStop dataService stopId
+    json stop 
