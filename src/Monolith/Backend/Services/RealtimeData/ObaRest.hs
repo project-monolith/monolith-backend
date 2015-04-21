@@ -19,7 +19,6 @@
 -- It fetches data from the One Bus Away REST API.
 module Monolith.Backend.Services.RealtimeData.ObaRest 
   ( newHandle
-  , module RD
   , module Monolith.Backend.Services.RealtimeData.ObaRest.Config
   ) where
 
