@@ -17,12 +17,17 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | This module contains the interface for services which provide the actual
+-- API functionality of the Monolith backend: running a web server and
+-- responding to requests for various data.
 module Monolith.Backend.Services.API
-  ( Handle(..)
+  ( API(..)
   ) where
 
 import Control.Concurrent.Async (Async)
 
--- | Handle to the web server. Currently this just holds
--- the async handle of the thread that's running the server.
-newtype Handle = Handle { getAsync :: Async () }
+-- | Handle for an API service instance.
+newtype API = API
+  { -- | The 'Async' reference to the thread that started the API service.
+    getAsync :: Async ()
+  }

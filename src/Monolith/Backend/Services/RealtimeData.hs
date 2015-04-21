@@ -18,9 +18,10 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
 -- | This is the interface for modules that provide realtime transit service
--- information to other services.
+-- information to other services in the Monolith backend. This service is
+-- specific to realtime data; static data should come from another service.
 module Monolith.Backend.Services.RealtimeData
-  ( Handle(..)
+  ( RealtimeData(..)
   , RealtimeDataException(..)
   , StopID
   ) where
@@ -37,5 +38,8 @@ instance Exception RealtimeDataException
 
 type StopID = T.Text
 
-newtype Handle = Handle
-  { incomingTripsForStop :: StopID -> IO Stop }
+-- | Handle for a real-time data service.
+newtype RealtimeData = RealtimeData
+  { -- | Get a 'Stop' object with real-time trip data for the given stop ID.
+    incomingTripsForStop :: StopID -> IO Stop
+  }

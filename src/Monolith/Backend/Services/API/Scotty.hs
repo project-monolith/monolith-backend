@@ -17,6 +17,8 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | This module implements the "Monolith.Backend.Services.API" interface with
+-- Scotty.
 module Monolith.Backend.Services.API.Scotty
   ( getHandle
   ) where
@@ -27,15 +29,19 @@ import Control.Concurrent.Async
 import Web.Scotty
 import Network.Wai.Handler.Warp (Port)
 import Monolith.Backend.Services.API
-import qualified Monolith.Backend.Services.RealtimeData as RD
+import Monolith.Backend.Services.RealtimeData
 
-getHandle :: RD.Handle -> Port -> IO Handle
-getHandle dataService port = Handle <$> async (scotty port (app dataService))
+-- | Create a new 'API'. This kicks off a new thread and starts up a
+-- Scotty in it. Presumably events coming into this web server will drive
+-- the rest of this application; all services should be written with
+-- concurrency in mind.
+getHandle :: RealtimeData -> Port -> IO API
+getHandle dataService port = API <$> async (scotty port (app dataService))
   
-app :: RD.Handle -> ScottyM ()
+app :: RealtimeData -> ScottyM ()
 app dataService = do
   
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
-    stop <- liftIO $ RD.incomingTripsForStop dataService stopId
+    stop <- liftIO $ incomingTripsForStop dataService stopId
     json stop 

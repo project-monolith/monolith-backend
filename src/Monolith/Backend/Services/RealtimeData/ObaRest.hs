@@ -32,8 +32,8 @@ import Monolith.Backend.Services.RealtimeData.ObaRest.Config
 
 -- * Get a new handle
 
-newHandle :: ObaRestConfig -> RD.Handle
-newHandle config = RD.Handle $ incomingTripsForStop' config
+newHandle :: ObaRestConfig -> RD.RealtimeData
+newHandle config = RD.RealtimeData $ incomingTripsForStop' config
 
 incomingTripsForStop' :: ObaRestConfig -> RD.StopID -> IO RDT.Stop
 incomingTripsForStop' config stopId = do
