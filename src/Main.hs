@@ -27,6 +27,7 @@ import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as B
 import Data.Aeson (encode)
 import qualified Monolith.Backend.Services.RealtimeData.ObaRest as OBA
+import qualified Monolith.Backend.Services.RealtimeData.Cache as CH
 import Monolith.Backend.Services.API (API(..))
 import qualified Monolith.Backend.Services.API.Scotty as SCTY
 
@@ -36,5 +37,6 @@ config = OBA.ObaRestConfig "TEST" "http://api.pugetsound.onebusaway.org/api/wher
 main :: IO ()
 main = do
   let oba = OBA.newHandle config
-  API async <- SCTY.getHandle oba 4567
+  cache <- CH.newRealtimeCache CH.defaultCacheConfig oba
+  API async <- SCTY.getHandle cache 4567
   wait async

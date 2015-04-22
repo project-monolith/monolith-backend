@@ -24,9 +24,14 @@
 module Monolith.Backend.Services.RealtimeData.Cache 
   ( CacheConfig(..)
   , defaultCacheConfig
+  , newRealtimeCache
   ) where
 
 import Control.Applicative
+import Control.Monad
+import qualified Control.Concurrent.ReadWriteVar as RWV
+import qualified Data.HashMap.Strict as HM
+import Data.Time.Clock
 import Data.Aeson.TH (deriveJSON, defaultOptions)
 import Monolith.Backend.Services.RealtimeData
 import Monolith.Backend.Services.RealtimeData.Types
@@ -47,5 +52,29 @@ newRealtimeCache :: CacheConfig -> RealtimeData -> IO RealtimeData
 newRealtimeCache (CacheConfig expTime) dataService =
   RealtimeData <$> incomingTripsForStop' expTime dataService
 
+type RWMap = RWV.RWVar (HM.HashMap StopID (UTCTime, Stop))
+
 incomingTripsForStop' :: Int -> RealtimeData -> IO (StopID -> IO Stop)
-incomingTripsForStop' = undefined
+incomingTripsForStop' expTime dataService = do
+  rwMap <- RWV.new HM.empty :: IO RWMap
+
+  return $ \stopId -> do
+    maybeCached <- RWV.with rwMap (return . HM.lookup stopId)
+    now <- getCurrentTime
+
+    let refreshAction = refresh rwMap stopId dataService
+    case maybeCached of
+      Just (time, stop) ->
+        let age = round $ diffUTCTime now time
+        in  if age > expTime
+            then putStrLn "found stale data, refreshing" >> refreshAction
+            else putStrLn "found fresh data" >> return stop
+      Nothing -> putStrLn "found no data, loading fresh" >> refreshAction
+
+refresh :: RWMap -> StopID -> RealtimeData -> IO Stop
+refresh rwMap stopId dataService = do
+  stop <- incomingTripsForStop dataService stopId
+  now <- getCurrentTime
+  RWV.modify_ rwMap (return . HM.insert stopId (now, stop))
+  return stop
+    
