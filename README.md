@@ -25,3 +25,15 @@ ghc and cabal. The website for the former offers easy-to-install linux
 binaries, and the github repo for the latter includes a build/install script.
 
 Better build/deploy options coming soon.
+
+## Documentation
+
+### REST API Methods
+
+Coming soon!
+
+### Code Docs
+
+Automatically generated documentation, hopefully updated as of the last significant change, can be found here:
+
+http://project-monolith.github.io/monolith-backend
