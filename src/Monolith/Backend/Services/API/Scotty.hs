@@ -25,12 +25,16 @@ module Monolith.Backend.Services.API.Scotty
 
 import Control.Applicative
 import Control.Monad.IO.Class
+import Control.Lens (over, (^.))
 import Control.Concurrent.Async
 import Web.Scotty
 import Network.Wai.Handler.Warp (Port)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import Data.Time.Clock (getCurrentTime)
 import Monolith.Backend.Services.API
+import Monolith.Backend.Services.API.Utilities
 import Monolith.Backend.Services.RealtimeData
+import Monolith.Backend.Services.RealtimeData.Types
 
 -- | Create a new 'API'. This kicks off a new thread and starts up a
 -- Scotty in it. Presumably events coming into this web server will drive
@@ -38,6 +42,10 @@ import Monolith.Backend.Services.RealtimeData
 -- concurrency in mind.
 getHandle :: RealtimeData -> Port -> IO API
 getHandle dataService port = API <$> async (scotty port (app dataService))
+
+-- | The number of trips to return (and the number of trips to skip for the
+-- ticker) by default.
+tripsCutoff = 9
   
 app :: RealtimeData -> ScottyM ()
 app dataService = do
@@ -45,5 +53,16 @@ app dataService = do
   
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
+    nTrips <- param "n_trips" `rescue` const (return tripsCutoff)
     stop <- liftIO $ incomingTripsForStop dataService stopId
-    json stop 
+    let stop' = over stopRoutes (take nTrips) stop
+    json stop'
+
+  get "/stops/:stop_id/ticker" $ do
+    stopId <- param "stop_id"
+    nSkipTrips <- param "n_skip_trips" `rescue` const (return tripsCutoff)
+    stop <- liftIO $ incomingTripsForStop dataService stopId
+    let stop' = over stopRoutes (drop nSkipTrips) stop
+    now <- liftIO $ getCurrentTime
+    let tickerText = getTickerText now $ drop nSkipTrips $ stop ^. stopRoutes
+    json tickerText
