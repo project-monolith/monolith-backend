@@ -26,6 +26,17 @@ binaries, and the github repo for the latter includes a build/install script.
 
 Better build/deploy options coming soon.
 
+## Contributing
+
+The Monolith backend is written in [Haskell](https://www.haskell.org). Its
+architecture is loosely based on the pattern described
+[here](https://www.fpcomplete.com/user/meiersi/the-service-pattern), and it
+currently uses the Scotty web framework.
+
+Anyone can submit a pull request! Haskell style is difficult to pin down in
+a rigid style guide, but your code should follow
+[these guidelines](https://github.com/tibbe/haskell-style-guide/blob/master/haskell-style.md).
+
 ## Documentation
 
 ### REST API Methods
