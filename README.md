@@ -24,7 +24,8 @@ Ubuntu, unfortunately), then you will need to find some other way of getting
 ghc and cabal. The website for the former offers easy-to-install linux
 binaries, and the github repo for the latter includes a build/install script.
 
-Better build/deploy options coming soon.
+Better build/deploy options coming soon. I am currently planning to distribute
+it as a packaged binary for whatever Linux environment we end up running on.
 
 ## Contributing
 
@@ -37,13 +38,86 @@ Anyone can submit a pull request! Haskell style is difficult to pin down in
 a rigid style guide, but your code should follow
 [these guidelines](https://github.com/tibbe/haskell-style-guide/blob/master/haskell-style.md).
 
-## Documentation
+## REST API Methods
 
-### REST API Methods
+In all these methods, `stop_id` should be a stop id of the form seen in GTFS
+and One Bus Away data. These are generally something like agencyid_stopid,
+e.g. `1_600`. You can find these stop IDs for particular stops by using the
+One Bus Away app.
 
-Coming soon!
+### GET /stops/{stop_id}/trips
 
-### Code Docs
+Returns a JSON object containing information about incoming trips in the near
+future. The trips are organized under objects representing the routes they are
+servicing. The ordering of the routes is ascending by the lowest wait time of all
+the trips for a route (though attributes are provided for the client to use a
+different comparator).
+
+#### Parameters
+
+* **n_trips** (*optional*) The number of trips to return. Default: 9
+
+#### Example
+
+```json
+{
+    "stopId": "1_300",
+    "stopTimestamp": 1429740287,
+    "stopDesc": "bar",
+    "stopRoutes": [{
+        "earliestTrip": 1429740562,
+        "routeId": "1_100068",
+        "routeNumber": "177",
+        "routeTrips": [{
+            "tripArrival": 1429740562,
+            "tripRouteId": "1_100068",
+            "tripWaitTime": 5,
+            "tripHeadSign": "FEDERAL WAY, 320TH P&R VIA I-5",
+            "tripId": "1_28152633",
+            "tripWaitSource": "Scheduled"
+        }],
+        "routeDesc": "Federal Way P&R Via I-5"
+    }, {
+        "earliestTrip": 1429740840,
+        "routeId": "40_577",
+        "routeNumber": "577",
+        "routeTrips": [{
+            "tripArrival": 1429740840,
+            "tripRouteId": "40_577",
+            "tripWaitTime": 9,
+            "tripHeadSign": "Federal Way",
+            "tripId": "40_5893734",
+            "tripWaitSource": "Realtime"
+        }, {
+            "tripArrival": 1429741080,
+            "tripRouteId": "40_577",
+            "tripWaitTime": 13,
+            "tripHeadSign": "Federal Way",
+            "tripId": "40_5893757",
+            "tripWaitSource": "Realtime"
+        }],
+        "routeDesc": ""
+    }]
+}
+```
+### GET /stops/{stop_id}/ticker
+
+Returns a (JSON) string of ticker-styled text, skipping some number of
+upcoming routes. This method is complementary to the `trips` method, and
+is used to allow compact display of routes that don't fit on the primary
+display.
+
+#### Parameters
+
+* **n_skip_trips** (*optional*) The number of imminent trips to leave out of the ticker. Default: 9
+
+#### Example
+
+```json
+"Route 24 in 2, 29 mins. Route D Line in 2, 15, 19, 32 mins. Route 16 in 4, 23 mins. Route 5 in 6, 20 mins. Route 13 in 9, 26, 33 mins. Route 26 in 13, 35 mins. Route 18 in 32 mins."
+```
+
+## Code Documentation
 
 Automatically generated documentation, hopefully updated as of the last significant change, can be found here:
 
