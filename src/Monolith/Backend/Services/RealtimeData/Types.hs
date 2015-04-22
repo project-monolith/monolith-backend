@@ -37,15 +37,16 @@ data Stop = Stop
   { stopId :: T.Text
   , stopDesc :: T.Text
   , stopRoutes :: [Route]
-  , stopTimestamp :: Int
+  , stopTimestamp :: Int -- timestamp
   } deriving Show
 
 data Route = Route
   { routeId :: T.Text
+  , earliestTrip :: Maybe Int -- timestamp
   , routeNumber :: T.Text
   , routeDesc :: T.Text
   , routeTrips :: S.Set Trip
-  } deriving (Eq, Ord, Show)
+  } deriving (Eq, Show)
 
 data Trip = Trip
   { tripArrival :: Int -- timestamp

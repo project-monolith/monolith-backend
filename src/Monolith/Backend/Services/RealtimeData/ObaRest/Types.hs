@@ -23,6 +23,7 @@ module Monolith.Backend.Services.RealtimeData.ObaRest.Types
 
 import Control.Applicative
 import Control.Monad (guard)
+import Data.List
 import qualified Data.Text as T
 import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
@@ -58,8 +59,8 @@ newtype ObaRoute = ObaRoute
 
 instance FromJSON ObaRoute where
   parseJSON (Object o) =
-    let route = RDT.Route <$> o .: "id" <*> o .: "shortName" <*> 
-                  o .: "description" <*> return S.empty
+    let route = RDT.Route <$> o .: "id" <*> return Nothing <*> 
+                  o .: "shortName" <*> o .: "description" <*> return S.empty
     in  ObaRoute <$> route
 
 newtype ObaStop = ObaStop RDT.Stop
@@ -74,27 +75,37 @@ instance FromJSON ObaStop where
     -- extract the sub-objects of interest; this is really ugly and there must be
     -- a better way?
     baseData <- getObject =<< getAttr "data" o
+    entryData <- getObject =<< getAttr "entry" baseData
 
-    tripsValue <- getAttr "arrivalsAndDepartures" =<<
-                    getObject =<< getAttr "entry" baseData 
-
+    tripsValue <- getAttr "arrivalsAndDepartures" entryData
     routesValue <- getAttr "routes" =<< getObject =<<
                      getAttr "references" baseData
+
+    let getStopId (String s) = return s
+        getStopId _ = empty
+    stopId <- getStopId =<< getAttr "stopId" entryData
 
     -- now parse the lists of trips and routes
     trips <- fmap obaGetTrip <$> parseJSON tripsValue :: Parser [RDT.Trip]
     routes <- fmap obaGetRoute <$> parseJSON routesValue :: Parser [RDT.Route]
   
     let routeMap =
-          foldr (\r@(RDT.Route routeId _ _ _) m -> HM.insert routeId r m) HM.empty routes
+          foldr (\r@(RDT.Route routeId _ _ _ _) m -> HM.insert routeId r m) HM.empty routes
+
         f t@(RDT.Trip _ _ routeId _ _) m =
-          let g (RDT.Route id num desc trips) = RDT.Route id num desc (S.insert t trips)
+          let g (RDT.Route id earliest num desc trips) =
+                let earliest' = case earliest of
+                      Just e -> Just $ min e (RDT.tripArrival t)
+                      Nothing -> Just $ RDT.tripArrival t
+                in  RDT.Route id earliest' num desc (S.insert t trips)
           in  HM.adjust g routeId m
+
         routesWithTrips = foldr f routeMap trips
         routesWithNotNullTrips =
           filter (not . S.null . RDT.routeTrips) $ HM.elems routesWithTrips
+        sortedRoutes = sortOn RDT.earliestTrip routesWithNotNullTrips
 
-    return $ ObaStop $ RDT.Stop "foo" "bar" routesWithNotNullTrips timestamp
+    return $ ObaStop $ RDT.Stop stopId "bar" sortedRoutes timestamp
 
 getAttr :: T.Text -> Object -> Parser Value
 getAttr key object = do
