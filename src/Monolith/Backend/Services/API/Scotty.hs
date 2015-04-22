@@ -28,6 +28,7 @@ import Control.Monad.IO.Class
 import Control.Concurrent.Async
 import Web.Scotty
 import Network.Wai.Handler.Warp (Port)
+import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Monolith.Backend.Services.API
 import Monolith.Backend.Services.RealtimeData
 
@@ -40,6 +41,7 @@ getHandle dataService port = API <$> async (scotty port (app dataService))
   
 app :: RealtimeData -> ScottyM ()
 app dataService = do
+  middleware logStdoutDev
   
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
