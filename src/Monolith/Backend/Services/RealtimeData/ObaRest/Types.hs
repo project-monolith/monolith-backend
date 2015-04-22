@@ -23,6 +23,7 @@ module Monolith.Backend.Services.RealtimeData.ObaRest.Types
 
 import Control.Applicative
 import Control.Monad (guard)
+import Control.Lens ((^.))
 import Data.List
 import qualified Data.Text as T
 import qualified Data.Set as S
@@ -95,15 +96,15 @@ instance FromJSON ObaStop where
         f t@(RDT.Trip _ _ routeId _ _) m =
           let g (RDT.Route id earliest num desc trips) =
                 let earliest' = case earliest of
-                      Just e -> Just $ min e (RDT.tripArrival t)
-                      Nothing -> Just $ RDT.tripArrival t
+                      Just e -> Just $ min e (t ^. RDT.tripArrival)
+                      Nothing -> Just $ (t ^. RDT.tripArrival)
                 in  RDT.Route id earliest' num desc (S.insert t trips)
           in  HM.adjust g routeId m
 
         routesWithTrips = foldr f routeMap trips
         routesWithNotNullTrips =
-          filter (not . S.null . RDT.routeTrips) $ HM.elems routesWithTrips
-        sortedRoutes = sortOn RDT.earliestTrip routesWithNotNullTrips
+          filter (not . S.null . (^. RDT.routeTrips)) $ HM.elems routesWithTrips
+        sortedRoutes = sortOn (^. RDT.earliestTrip) routesWithNotNullTrips
 
     return $ ObaStop $ RDT.Stop stopId "bar" sortedRoutes timestamp
 

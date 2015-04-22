@@ -20,11 +20,34 @@
 -- | This module contains the types and instances that pertain directly to
 -- the data served up by the REST API. They do not apply outside of that
 -- context.
-module Monolith.Backend.Services.RealtimeData.Types where
+module Monolith.Backend.Services.RealtimeData.Types 
+  ( Stop (Stop)
+  , stopId
+  , stopDesc
+  , stopRoutes
+  , stopTimestamp
+
+  , Route (Route)
+  , routeId
+  , earliestTrip
+  , routeNumber
+  , routeDesc
+  , routeTrips
+
+  , Trip (Trip)
+  , tripArrival
+  , tripId
+  , tripRouteId
+  , tripWaitSource
+  , tripHeadSign
+
+  , WaitSource (Realtime, Scheduled)
+  ) where
 
 import qualified Data.Set as S
 import qualified Data.Text as T
 import qualified Data.Aeson.TH as J
+import qualified Control.Lens.TH as L
 
 -- | This type encapsulates some information about a stop, and contains
 -- a list of routes and upcoming trips for those routes. (and so on).
@@ -34,31 +57,37 @@ import qualified Data.Aeson.TH as J
 -- We use `Set`s here so that there's no possibility for things to get
 -- out of order. The correct ordering is important.
 data Stop = Stop
-  { stopId :: T.Text
-  , stopDesc :: T.Text
-  , stopRoutes :: [Route]
-  , stopTimestamp :: Int -- timestamp
+  { _stopId :: T.Text
+  , _stopDesc :: T.Text
+  , _stopRoutes :: [Route]
+  , _stopTimestamp :: Int -- timestamp
   } deriving Show
 
 data Route = Route
-  { routeId :: T.Text
-  , earliestTrip :: Maybe Int -- timestamp
-  , routeNumber :: T.Text
-  , routeDesc :: T.Text
-  , routeTrips :: S.Set Trip
+  { _routeId :: T.Text
+  , _earliestTrip :: Maybe Int -- timestamp
+  , _routeNumber :: T.Text
+  , _routeDesc :: T.Text
+  , _routeTrips :: S.Set Trip
   } deriving (Eq, Show)
 
 data Trip = Trip
-  { tripArrival :: Int -- timestamp
-  , tripId :: T.Text
-  , tripRouteId :: T.Text
-  , tripWaitSource :: WaitSource
-  , tripHeadSign :: T.Text
+  { _tripArrival :: Int -- timestamp
+  , _tripId :: T.Text
+  , _tripRouteId :: T.Text
+  , _tripWaitSource :: WaitSource
+  , _tripHeadSign :: T.Text
   } deriving (Eq, Ord, Show)
 
 data WaitSource = Realtime | Scheduled deriving (Eq, Ord, Show)
 
-$(J.deriveToJSON J.defaultOptions ''WaitSource)
-$(J.deriveToJSON J.defaultOptions ''Trip)
-$(J.deriveToJSON J.defaultOptions ''Route)
-$(J.deriveToJSON J.defaultOptions ''Stop)
+jsonOptions = J.defaultOptions { J.fieldLabelModifier = tail }
+
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''WaitSource)
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''Trip)
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''Route)
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''Stop)
+
+L.makeLenses ''Stop
+L.makeLenses ''Route
+L.makeLenses ''Trip
