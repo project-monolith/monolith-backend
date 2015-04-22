@@ -22,12 +22,13 @@ module Monolith.Backend.Services.RealtimeData.ObaRest.Types
  ) where
 
 import Control.Applicative
-import Control.Monad (guard)
-import Control.Lens ((^.))
+import Control.Monad (guard, forM)
+import Control.Lens (set, (^.))
 import Data.List
 import qualified Data.Text as T
 import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
+import Data.Time.Clock
 import Data.Aeson
 import Data.Aeson.Types (Parser, parseMaybe)
 import qualified Monolith.Backend.Services.RealtimeData.Types as RDT
@@ -51,8 +52,15 @@ instance FromJSON ObaTrip where
         
     arrival <- (`div` 1000) <$> o .: arrivalKey
     headsign <- o .: "tripHeadsign"
-    return $ ObaTrip $ RDT.Trip arrival tripId routeId predicted headsign
+    return $ ObaTrip $ RDT.Trip arrival Nothing tripId routeId predicted headsign
   parseJSON _ = empty
+
+setTripWaitTime :: Int -- ^ The timestamp to use as "now"
+                -> RDT.Trip -- ^ A trip with no (?) wait time
+                -> RDT.Trip -- ^ the new trip with timestamp added
+setTripWaitTime now t =
+  let wait = round $ fromIntegral ((t ^. RDT.tripArrival) - now) / 60.0
+  in  set RDT.tripWaitTime (Just wait) t
 
 newtype ObaRoute = ObaRoute
   { obaGetRoute :: RDT.Route
@@ -87,13 +95,16 @@ instance FromJSON ObaStop where
     stopId <- getStopId =<< getAttr "stopId" entryData
 
     -- now parse the lists of trips and routes
-    trips <- fmap obaGetTrip <$> parseJSON tripsValue :: Parser [RDT.Trip]
+    trips' <- fmap obaGetTrip <$> parseJSON tripsValue :: Parser [RDT.Trip]
     routes <- fmap obaGetRoute <$> parseJSON routesValue :: Parser [RDT.Route]
-  
+
+    -- add wait times to trips
+    let trips = map (setTripWaitTime timestamp) trips'
+
     let routeMap =
           foldr (\r@(RDT.Route routeId _ _ _ _) m -> HM.insert routeId r m) HM.empty routes
 
-        f t@(RDT.Trip _ _ routeId _ _) m =
+        f t@(RDT.Trip _ _ _ routeId _ _) m =
           let g (RDT.Route id earliest num desc trips) =
                 let earliest' = case earliest of
                       Just e -> Just $ min e (t ^. RDT.tripArrival)

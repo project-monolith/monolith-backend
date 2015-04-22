@@ -36,6 +36,7 @@ module Monolith.Backend.Services.RealtimeData.Types
 
   , Trip (Trip)
   , tripArrival
+  , tripWaitTime
   , tripId
   , tripRouteId
   , tripWaitSource
@@ -73,6 +74,7 @@ data Route = Route
 
 data Trip = Trip
   { _tripArrival :: Int -- timestamp
+  , _tripWaitTime :: Maybe Int -- minutes
   , _tripId :: T.Text
   , _tripRouteId :: T.Text
   , _tripWaitSource :: WaitSource
