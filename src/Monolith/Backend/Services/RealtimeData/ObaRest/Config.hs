@@ -24,8 +24,8 @@ module Monolith.Backend.Services.RealtimeData.ObaRest.Config
 import Data.Aeson.TH (deriveJSON, defaultOptions)
 
 data ObaRestConfig = ObaRestConfig
-  { obaRestApiKey :: String
-  , obaRestRootUrl :: String
+  { obaRestApiKey :: !String
+  , obaRestRootUrl :: !String
   } deriving Show
 
 $(deriveJSON defaultOptions ''ObaRestConfig)

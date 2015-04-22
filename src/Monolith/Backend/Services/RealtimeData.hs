@@ -33,7 +33,7 @@ import Monolith.Backend.Services.RealtimeData.Types
 
 -- | General-purpose exception to throw when something goes wrong fetching
 -- real-time data.
-data RealtimeDataException = RealtimeDataException String deriving (Show, Typeable)
+data RealtimeDataException = RealtimeDataException !String deriving (Show, Typeable)
 instance Exception RealtimeDataException
 
 type StopID = T.Text

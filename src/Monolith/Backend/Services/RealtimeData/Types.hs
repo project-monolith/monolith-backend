@@ -58,27 +58,27 @@ import qualified Control.Lens.TH as L
 -- We use `Set`s here so that there's no possibility for things to get
 -- out of order. The correct ordering is important.
 data Stop = Stop
-  { _stopId :: T.Text
-  , _stopDesc :: T.Text
-  , _stopRoutes :: [Route]
-  , _stopTimestamp :: Int -- timestamp
+  { _stopId :: !T.Text
+  , _stopDesc :: !T.Text
+  , _stopRoutes :: ![Route]
+  , _stopTimestamp :: !Int -- timestamp
   } deriving Show
 
 data Route = Route
-  { _routeId :: T.Text
-  , _earliestTrip :: Maybe Int -- timestamp
-  , _routeNumber :: T.Text
-  , _routeDesc :: T.Text
-  , _routeTrips :: S.Set Trip
+  { _routeId :: !T.Text
+  , _earliestTrip :: !(Maybe Int) -- timestamp
+  , _routeNumber :: !T.Text
+  , _routeDesc :: !T.Text
+  , _routeTrips :: !(S.Set Trip)
   } deriving (Eq, Show)
 
 data Trip = Trip
-  { _tripArrival :: Int -- timestamp
-  , _tripWaitTime :: Maybe Int -- minutes
-  , _tripId :: T.Text
-  , _tripRouteId :: T.Text
-  , _tripWaitSource :: WaitSource
-  , _tripHeadSign :: T.Text
+  { _tripArrival :: !Int -- timestamp
+  , _tripWaitTime :: !(Maybe Int) -- minutes
+  , _tripId :: !T.Text
+  , _tripRouteId :: !T.Text
+  , _tripWaitSource :: !WaitSource
+  , _tripHeadSign :: !T.Text
   } deriving (Eq, Ord, Show)
 
 data WaitSource = Realtime | Scheduled deriving (Eq, Ord, Show)

@@ -39,7 +39,7 @@ import Monolith.Backend.Services.RealtimeData.Types
 -- | Configuration type for this service
 data CacheConfig = CacheConfig
   { -- | The expiration time of cache data, in seconds
-    expirationTime :: Int
+    expirationTime :: !Int
   } deriving Show
 
 $(deriveJSON defaultOptions ''CacheConfig)
