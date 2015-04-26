@@ -26,7 +26,18 @@ source-repository head
 
 executable monolith-backend
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:       
+    Monolith.Backend.Services.API
+    Monolith.Backend.Services.API.Scotty
+    Monolith.Backend.Services.API.Utilities
+    Monolith.Backend.Services.RealtimeData
+    Monolith.Backend.Services.RealtimeData.Cache
+    Monolith.Backend.Services.RealtimeData.ObaRest
+    Monolith.Backend.Services.RealtimeData.Types
+    Monolith.Backend.Services.RealtimeData.ObaRest.Config
+    Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
+    Monolith.Backend.Services.RealtimeData.ObaRest.Types
+    
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9, aeson >=0.8.0.2 && <0.9,
                        HTTP >=4000.2.19 && <4000.3, bytestring >=0.10.6.0 && <0.11,
