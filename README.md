@@ -1,5 +1,7 @@
 # monolith-backend
 
+[![Build Status](https://travis-ci.org/project-monolith/monolith-backend.svg?branch=master)](https://travis-ci.org/project-monolith/monolith-backend)
+
 This is the backend service for Project Monolith. It is responsible for
 fetching data from various sources, aggregating them, and providing them to
 clients (such as monolith-frontend) upon request. It should use static data
