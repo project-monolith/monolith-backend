@@ -37,6 +37,9 @@ executable monolith-backend
     Monolith.Backend.Services.RealtimeData.ObaRest.Config
     Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
     Monolith.Backend.Services.RealtimeData.ObaRest.Types
+    Monolith.Backend.Services.StaticData
+    Monolith.Backend.Services.StaticData.ObaRest
+    Monolith.Backend.Services.StaticData.Types
     
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9, aeson >=0.8.0.2 && <0.9,
