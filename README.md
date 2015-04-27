@@ -11,16 +11,21 @@ don't get mad at us.
 ## Getting it, building and running it
 
 You will need to get the latest ghc and cabal-install, both of which are 
-available in homebrew. Then, to build and run it in place:
+available in homebrew. We are using ghc 7.10.1 and cabal 1.22.0.0, so make
+sure that you have recently run `brew update` or are otherwise up to date
+using your package manager of choice. Then, to build and run it in place:
 
     git clone git@github.com:project-monolith/monolith-backend.git
     cd monolith-backend
+    cabal update
     cabal sandbox init
-    cabal install --only-dependencies
+    cabal install -j --only-dependencies
     cabal build
     dist/build/monolith-backend/monolith-backend
 
-Ask @mdunsmuir if you run into problems getting it to work. If you are using
+Ask @mdunsmuir if you run into problems getting it to work, or you can check
+out the .travis.yml file to see a slightly different build method that may
+work better for you. If you are using
 an operating system whose default Haskell packages are not up-to-date (like
 Ubuntu, unfortunately), then you will need to find some other way of getting
 ghc and cabal. The website for the former offers easy-to-install linux
