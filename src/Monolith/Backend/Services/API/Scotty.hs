@@ -35,6 +35,7 @@ import Monolith.Backend.Services.API
 import Monolith.Backend.Services.API.Utilities
 import Monolith.Backend.Services.RealtimeData
 import Monolith.Backend.Services.RealtimeData.Types
+import qualified Monolith.Backend.Services.StaticData as SD
 
 -- | Create a new 'API'. This kicks off a new thread and starts up a
 -- Scotty in it. Presumably events coming into this web server will drive

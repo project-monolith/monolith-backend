@@ -29,9 +29,9 @@ import Monolith.Backend.Services.RealtimeData.ObaRest.Config
 -- This function takes care of putting that behind a reasonably usable interface, and
 -- will result in `Either` an error `String` or an Aeson FromJSON instance.
 jsonForRouteAndParams :: FromJSON j =>
-  ObaRestConfig -> String -> String -> [(String, String)] -> IO (Either String j)
+  ObaRestConfig -> String -> Maybe String -> [(String, String)] -> IO (Either String j)
 
-jsonForRouteAndParams (ObaRestConfig key root) method id params = do
+jsonForRouteAndParams (ObaRestConfig key root) method maybeId params = do
   result <- simpleHTTP (getRequest url)
   return $ case result of
     Left err -> Left $ show err
@@ -43,6 +43,8 @@ jsonForRouteAndParams (ObaRestConfig key root) method id params = do
                            Nothing -> Left "couldn't decode JSON!"
         _         -> Left reason
   where
-    url = root ++ method ++ "/" ++ id ++ ".json?" ++ paramStr
+    url = case maybeId of
+            Just id -> root ++ method ++ "/" ++ id ++ ".json?" ++ paramStr
+            Nothing -> root ++ method ++ ".json?" ++ paramStr
     paramStr = 
       concat $ intersperse "&" $ map (\(k, v) -> k ++ "=" ++ v) (("key", key) : params)

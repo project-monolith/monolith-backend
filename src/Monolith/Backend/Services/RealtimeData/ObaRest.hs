@@ -38,7 +38,7 @@ newHandle config = RD.RealtimeData $ incomingTripsForStop' config
 incomingTripsForStop' :: ObaRestConfig -> RD.StopID -> IO RDT.Stop
 incomingTripsForStop' config stopId = do
   datas <- jsonForRouteAndParams config "arrivals-and-departures-for-stop"
-             (T.unpack stopId) []
+             (Just $ T.unpack stopId) []
   case datas of
     Left err -> throwIO $ RD.RealtimeDataException err
     Right (ObaStop s) -> return s
