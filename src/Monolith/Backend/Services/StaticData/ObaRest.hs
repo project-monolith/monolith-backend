@@ -17,6 +17,7 @@
 
 module Monolith.Backend.Services.StaticData.ObaRest where
 
+import Control.Exception
 import Monolith.Backend.Services.StaticData
 import Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
 import Monolith.Backend.Services.RealtimeData.ObaRest.Config
@@ -25,12 +26,9 @@ newHandle :: ObaRestConfig -> StaticData
 newHandle config = StaticData $ stopsWithinRadius' config
 
 stopsWithinRadius' :: ObaRestConfig -> Point -> Double -> IO [Stop]
-stopsWithinRadius' config (Point lon lat) radius = undefined --do
-
-{-
+stopsWithinRadius' config (Point lon lat) radius = do
   let params = [("lon", show lon), ("lat", show lat), ("radius", show radius)]
   datas <- jsonForRouteAndParams config "stops-for-location" Nothing params
   case datas of
-    Left err -> undefined
-    Right (ObaStop s) -> return s
--}
+    Left err -> throwIO $ StaticDataException err
+    Right (Stop s) -> return s

@@ -36,6 +36,7 @@ import Monolith.Backend.Services.API.Utilities
 import Monolith.Backend.Services.RealtimeData
 import Monolith.Backend.Services.RealtimeData.Types
 import qualified Monolith.Backend.Services.StaticData as SD
+import qualified Monolith.Backend.Services.StaticData.ObaRest as SDO
 
 -- | Create a new 'API'. This kicks off a new thread and starts up a
 -- Scotty in it. Presumably events coming into this web server will drive
@@ -47,11 +48,11 @@ getHandle dataService port = API <$> async (scotty port (app dataService))
 -- | The number of trips to return (and the number of trips to skip for the
 -- ticker) by default.
 tripsCutoff = 9
-  
+
 app :: RealtimeData -> ScottyM ()
 app dataService = do
   middleware logStdoutDev
-  
+
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
     nTrips <- param "n_trips" `rescue` const (return tripsCutoff)
