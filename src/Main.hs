@@ -17,7 +17,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Main 
+module Main
   ( main
   ) where
 
@@ -28,6 +28,7 @@ import qualified Data.ByteString.Lazy as B
 import Data.Aeson (encode)
 import qualified Monolith.Backend.Services.RealtimeData.ObaRest as OBA
 import qualified Monolith.Backend.Services.RealtimeData.Cache as CH
+import qualified Monolith.Backend.Services.StaticData.ObaRest as OBAS
 import Monolith.Backend.Services.API (API(..))
 import qualified Monolith.Backend.Services.API.Scotty as SCTY
 
@@ -37,6 +38,7 @@ config = OBA.ObaRestConfig "TEST" "http://api.pugetsound.onebusaway.org/api/wher
 main :: IO ()
 main = do
   let oba = OBA.newHandle config
+  obas <- OBAS.newHandle config
   cache <- CH.newRealtimeCache CH.defaultCacheConfig oba
-  API async <- SCTY.getHandle cache 4567
+  API async <- SCTY.getHandle cache obas 4567
   wait async

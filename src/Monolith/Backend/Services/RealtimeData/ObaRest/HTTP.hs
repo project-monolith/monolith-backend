@@ -15,36 +15,44 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
   ( jsonForRouteAndParams
   ) where
 
+import Control.Exception
 import Network.HTTP
+import Data.Typeable
 import Data.List (intersperse)
 import Data.ByteString.Lazy (pack)
 import Data.Aeson
 import Monolith.Backend.Services.RealtimeData.ObaRest.Config
 
+data HTTPException = HTTPException !String deriving (Show, Typeable)
+instance Exception HTTPException
+
 -- | The OBA REST API methods are basically foo.bar/baz/METHOD/ID.json?params=things
 -- This function takes care of putting that behind a reasonably usable interface, and
 -- will result in `Either` an error `String` or an Aeson FromJSON instance.
 jsonForRouteAndParams :: FromJSON j =>
-  ObaRestConfig -> String -> Maybe String -> [(String, String)] -> IO (Either String j)
+  ObaRestConfig -> String -> Maybe String -> [(String, String)] -> IO j
 
 jsonForRouteAndParams (ObaRestConfig key root) method maybeId params = do
+  let throwErr = throwIO . HTTPException
   result <- simpleHTTP (getRequest url)
-  return $ case result of
-    Left err -> Left $ show err
-    Right (Response code reason _ body) -> 
+  case result of
+    Left err -> throwErr $ show err
+    Right (Response code reason _ body) ->
       case code of
         (2, _, _) -> let decoded = decode $ pack $ map (toEnum . fromEnum) body
                      in  case decoded of
-                           Just dec -> Right dec
-                           Nothing -> Left "couldn't decode JSON!"
-        _         -> Left reason
+                           Just dec -> return dec
+                           Nothing -> throwErr "couldn't decode JSON!"
+        _         -> throwErr $ show reason
   where
     url = case maybeId of
             Just id -> root ++ method ++ "/" ++ id ++ ".json?" ++ paramStr
             Nothing -> root ++ method ++ ".json?" ++ paramStr
-    paramStr = 
+    paramStr =
       concat $ intersperse "&" $ map (\(k, v) -> k ++ "=" ++ v) (("key", key) : params)

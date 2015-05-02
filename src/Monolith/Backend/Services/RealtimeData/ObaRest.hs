@@ -15,9 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
--- | This service implements the `Monolith.Backend.Services.RealtimeData` 
+-- | This service implements the `Monolith.Backend.Services.RealtimeData`
 -- interface. It fetches data from the One Bus Away REST API.
-module Monolith.Backend.Services.RealtimeData.ObaRest 
+module Monolith.Backend.Services.RealtimeData.ObaRest
   ( newHandle
   , module Monolith.Backend.Services.RealtimeData.ObaRest.Config
   ) where
@@ -37,8 +37,6 @@ newHandle config = RD.RealtimeData $ incomingTripsForStop' config
 
 incomingTripsForStop' :: ObaRestConfig -> RD.StopID -> IO RDT.Stop
 incomingTripsForStop' config stopId = do
-  datas <- jsonForRouteAndParams config "arrivals-and-departures-for-stop"
-             (Just $ T.unpack stopId) []
-  case datas of
-    Left err -> throwIO $ RD.RealtimeDataException err
-    Right (ObaStop s) -> return s
+  (ObaStop s) <- jsonForRouteAndParams config "arrivals-and-departures-for-stop"
+    (Just $ T.unpack stopId) []
+  return s
