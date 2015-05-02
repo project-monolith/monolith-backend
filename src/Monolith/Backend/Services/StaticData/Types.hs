@@ -19,12 +19,21 @@
     TemplateHaskell,
     DeriveDataTypeable #-}
 
+-- | This module contains outward-facing types relevant to the static data
+-- service interface, which is basically responsible for providing info like
+-- which stops are where, which routes service which stops, and so on.
 module Monolith.Backend.Services.StaticData.Types
-  ( StaticDataException(..)
+  ( -- * Exceptions
+    StaticDataException(..)
 
+    -- * Point data type and lenses
   , Point(..)
   , pointLon
   , pointLat
+
+    -- * Stop data type and lenses
+  , Route
+  , StopId
 
   , Stop(..)
   , stopId
@@ -32,6 +41,15 @@ module Monolith.Backend.Services.StaticData.Types
   , stopLocation
   , stopDirection
   , stopRoutes
+
+    -- * Stop vicinity data type and lenses
+  , StopVicinity(..)
+  , vicinityHomeStop
+  , vicinityRadius
+  , vicinityNearbyStops
+  , vicinityBikeShares
+  , vicinityCarShares
+  , vicinityEvents
   ) where
 
 import Control.Exception
@@ -52,14 +70,27 @@ $(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = tail } ''Point)
 makeLenses ''Point
 
 type Route = T.Text
+type StopId = T.Text
 
 data Stop = Stop
-  { _stopId :: !T.Text
+  { _stopId :: !StopId
   , _stopName :: !T.Text
   , _stopLocation :: !Point
   , _stopDirection :: !T.Text
-  , _stopRoutes :: [Route]
+  , _stopRoutes :: ![Route]
   } deriving Show
 
 $(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = tail } ''Stop)
 makeLenses ''Stop
+
+data StopVicinity = StopVicinity
+  { _vicinityHomeStop :: Stop
+  , _vicinityRadius :: Double
+  , _vicinityNearbyStops :: [Stop]
+  , _vicinityBikeShares :: [()]
+  , _vicinityCarShares :: [()]
+  , _vicinityEvents :: [()]
+  } deriving Show
+
+$(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = tail } ''StopVicinity)
+makeLenses ''StopVicinity

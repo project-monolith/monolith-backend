@@ -75,10 +75,7 @@ app realtime static = do
     let tickerText = getTickerText now $ drop nSkipTrips $ stop ^. stopRoutes
     json tickerText
 
-  get "/stops/near_location" $ do
-    [lon, lat] <-
-      forM ["lon", "lat"] $ \name -> read <$> param name
-    radius <-
-      param "radius" `rescue` const (return stopSearchRadius)
-
-    json =<< liftIO (SD.stopsWithinRadius static (SD.Point lon lat) radius)
+  get "/stops/:stop_id/vicinity" $ do
+    stopId <- param "stop_id"
+    radius <- param "radius" `rescue` const (return stopSearchRadius)
+    json =<< liftIO (SD.stopsWithinRadiusOfStop static stopId radius)
