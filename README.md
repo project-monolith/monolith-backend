@@ -122,6 +122,102 @@ display.
 "Route 24 in 2, 29 mins. Route D Line in 2, 15, 19, 32 mins. Route 16 in 4, 23 mins. Route 5 in 6, 20 mins. Route 13 in 9, 26, 33 mins. Route 26 in 13, 35 mins. Route 18 in 32 mins."
 ```
 
+### GET /stops/{stop_id}/vicinity
+
+Returns data concerning nearby bus stops, bike shares, car shares, and so on.
+Intended for use by the map view in the front end.
+
+#### Parameters
+
+* **radius** (*optional*) The radius, in meters, to search within for "nearby attractions". Default: 100
+
+#### Example
+```json
+{
+    "vicinityRadius": 70,
+    "vicinityHomeStop": {
+        "stopName": "3rd Ave & Pike St",
+        "stopId": "1_578",
+        "stopRoutes": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "7",
+            "13",
+            "14",
+            "15",
+            "29",
+            "36",
+            "49",
+            "66",
+            "70",
+            "82",
+            "83",
+            "C Line",
+            "D Line",
+            "E Line"
+        ],
+        "stopDirection": "NW",
+        "stopLocation": {
+            "pointLon": -122.338173,
+            "pointLat": 47.61029
+        }
+    },
+    "vicinityNearbyStops": [{
+        "stopName": "Pine Street Island & 3rd Ave",
+        "stopId": "1_1111",
+        "stopRoutes": [
+            "7",
+            "11",
+            "43",
+            "49",
+            "84"
+        ],
+        "stopDirection": "W",
+        "stopLocation": {
+            "pointLon": -122.338554,
+            "pointLat": 47.610844
+        }
+    }, {
+        "stopName": "3rd Ave & Pike St",
+        "stopId": "1_431",
+        "stopRoutes": [
+            "5",
+            "15",
+            "21",
+            "24",
+            "26",
+            "28",
+            "55",
+            "56",
+            "57",
+            "116",
+            "118",
+            "119",
+            "120",
+            "124",
+            "125",
+            "131",
+            "132",
+            "304",
+            "355",
+            "C Line",
+            "D Line",
+            "E Line"
+        ],
+        "stopDirection": "SE",
+        "stopLocation": {
+            "pointLon": -122.337959,
+            "pointLat": 47.609791
+        }
+    }],
+    "vicinityBikeShares": [],
+    "vicinityCarShares": [],
+    "vicinityEvents": []
+}
+```
+
 ## Code Documentation
 
 Automatically generated documentation, hopefully updated as of the last significant change, can be found here:
