@@ -65,7 +65,8 @@ setTripWaitTime :: Int -- ^ The timestamp to use as "now"
                 -> RDT.Trip -- ^ the new trip with timestamp added
 setTripWaitTime now t =
   let wait = round $ fromIntegral ((t ^. RDT.tripArrival) - now) / 60.0
-  in  set RDT.tripWaitTime (Just wait) t
+      twt = if wait < 1 then RDT.TripDue wait else RDT.TripArrivesIn wait
+  in  set RDT.tripWaitTime (Just twt) t
 
 newtype ObaRoute = ObaRoute
   { obaGetRoute :: RDT.Route
@@ -118,7 +119,7 @@ instance FromJSON ObaStop where
           let g (RDT.Route id earliest num desc trips) =
                 let earliest' = case earliest of
                       Just e -> Just $ min e (t ^. RDT.tripArrival)
-                      Nothing -> Just $ (t ^. RDT.tripArrival)
+                      Nothing -> Just (t ^. RDT.tripArrival)
                 in  RDT.Route id earliest' num desc (S.insert t trips)
           in  HM.adjust g routeId m
 

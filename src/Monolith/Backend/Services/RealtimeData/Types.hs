@@ -20,7 +20,7 @@
 -- | This module contains the types and instances that pertain directly to
 -- the data served up by the REST API. They do not apply outside of that
 -- context.
-module Monolith.Backend.Services.RealtimeData.Types 
+module Monolith.Backend.Services.RealtimeData.Types
   ( Stop (Stop)
   , stopId
   , stopDesc
@@ -33,6 +33,8 @@ module Monolith.Backend.Services.RealtimeData.Types
   , routeNumber
   , routeDesc
   , routeTrips
+
+  , TripWaitTime(..)
 
   , Trip (Trip)
   , tripArrival
@@ -47,6 +49,7 @@ module Monolith.Backend.Services.RealtimeData.Types
 
 import qualified Data.Set as S
 import qualified Data.Text as T
+import Data.Aeson
 import qualified Data.Aeson.TH as J
 import qualified Control.Lens.TH as L
 
@@ -72,9 +75,15 @@ data Route = Route
   , _routeTrips :: !(S.Set Trip)
   } deriving (Eq, Show)
 
+data TripWaitTime = TripDue Int | TripArrivesIn Int deriving (Eq, Ord, Show)
+
+instance ToJSON TripWaitTime where
+  toJSON (TripDue _) = String "DUE"
+  toJSON (TripArrivesIn mins) = Number $ fromIntegral mins
+
 data Trip = Trip
   { _tripArrival :: !Int -- timestamp
-  , _tripWaitTime :: !(Maybe Int) -- minutes
+  , _tripWaitTime :: !(Maybe TripWaitTime) -- minutes
   , _tripId :: !T.Text
   , _tripRouteId :: !T.Text
   , _tripWaitSource :: !WaitSource
