@@ -21,7 +21,7 @@
 -- interface. It sits on another implementation of the same interface, and
 -- acts as a caching layer that allows previously computed results within
 -- some staleness threshold to be re-used.
-module Monolith.Backend.Services.RealtimeData.Cache 
+module Monolith.Backend.Services.RealtimeData.Cache
   ( CacheConfig(..)
   , defaultCacheConfig
   , newRealtimeCache
@@ -77,4 +77,3 @@ refresh rwMap stopId dataService = do
   now <- getCurrentTime
   RWV.modify_ rwMap (return . HM.insert stopId (now, stop))
   return stop
-    

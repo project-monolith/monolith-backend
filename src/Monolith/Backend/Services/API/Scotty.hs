@@ -24,6 +24,7 @@ module Monolith.Backend.Services.API.Scotty
   ) where
 
 import Control.Applicative
+import Control.Monad (forM)
 import Control.Monad.IO.Class
 import Control.Lens (over, (^.))
 import Control.Concurrent.Async
@@ -41,29 +42,40 @@ import qualified Monolith.Backend.Services.StaticData as SD
 -- Scotty in it. Presumably events coming into this web server will drive
 -- the rest of this application; all services should be written with
 -- concurrency in mind.
-getHandle :: RealtimeData -> Port -> IO API
-getHandle dataService port = API <$> async (scotty port (app dataService))
+getHandle :: RealtimeData -> SD.StaticData -> Port -> IO API
+getHandle realtime static port =
+  API <$> async (scotty port (app realtime static))
 
 -- | The number of trips to return (and the number of trips to skip for the
 -- ticker) by default.
+tripsCutoff :: Int
 tripsCutoff = 9
-  
-app :: RealtimeData -> ScottyM ()
-app dataService = do
+
+-- | the default search radius for stops near location, in meters
+stopSearchRadius :: Double
+stopSearchRadius = 100.0
+
+app :: RealtimeData -> SD.StaticData -> ScottyM ()
+app realtime static = do
   middleware logStdoutDev
-  
+
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
     nTrips <- param "n_trips" `rescue` const (return tripsCutoff)
-    stop <- liftIO $ incomingTripsForStop dataService stopId
+    stop <- liftIO $ incomingTripsForStop realtime stopId
     let stop' = over stopRoutes (take nTrips) stop
     json stop'
 
   get "/stops/:stop_id/ticker" $ do
     stopId <- param "stop_id"
     nSkipTrips <- param "n_skip_trips" `rescue` const (return tripsCutoff)
-    stop <- liftIO $ incomingTripsForStop dataService stopId
+    stop <- liftIO $ incomingTripsForStop realtime stopId
     let stop' = over stopRoutes (drop nSkipTrips) stop
     now <- liftIO $ getCurrentTime
     let tickerText = getTickerText now $ drop nSkipTrips $ stop ^. stopRoutes
     json tickerText
+
+  get "/stops/:stop_id/vicinity" $ do
+    stopId <- param "stop_id"
+    radius <- param "radius" `rescue` const (return stopSearchRadius)
+    json =<< liftIO (SD.stopsWithinRadiusOfStop static stopId radius)

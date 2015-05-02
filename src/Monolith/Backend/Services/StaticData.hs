@@ -31,4 +31,5 @@ module Monolith.Backend.Services.StaticData
 import Monolith.Backend.Services.StaticData.Types
 
 data StaticData = StaticData
-  { stopsWithinRadius :: Point -> Double -> IO [Stop] }
+  { stopsWithinRadius :: Point -> Double -> IO [Stop]
+  , stopsWithinRadiusOfStop :: StopId -> Double -> IO StopVicinity }

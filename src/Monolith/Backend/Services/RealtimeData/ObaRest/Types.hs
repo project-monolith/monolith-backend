@@ -23,21 +23,21 @@ module Monolith.Backend.Services.RealtimeData.ObaRest.Types
 
 import Control.Applicative
 import Control.Monad (guard, forM)
-import Control.Lens (set, (^.))
+import Control.Lens (set, (^.), (^?))
 import Data.List
+import Data.Maybe (maybe)
 import qualified Data.Text as T
 import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
 import Data.Time.Clock
 import Data.Aeson
-import Data.Aeson.Lens (key)
-import Data.Aeson.Types (Parser, parseMaybe)
+import Data.Aeson.Lens
 import qualified Monolith.Backend.Services.RealtimeData.Types as RDT
 
 -- * Wrapper types for parsing the realtime data types without overlapping
 -- instances
 
-newtype ObaTrip = ObaTrip 
+newtype ObaTrip = ObaTrip
   { obaGetTrip :: RDT.Trip
   } deriving Show
 
@@ -50,11 +50,15 @@ instance FromJSON ObaTrip where
         arrivalKey = case predicted of
                        RDT.Realtime -> "predictedArrivalTime"
                        RDT.Scheduled -> "scheduledArrivalTime"
-        
+
     arrival <- (`div` 1000) <$> o .: arrivalKey
     headsign <- o .: "tripHeadsign"
     return $ ObaTrip $ RDT.Trip arrival Nothing tripId routeId predicted headsign
   parseJSON _ = empty
+
+-- | Dummy instance to allow lens magic
+instance ToJSON ObaTrip where
+  toJSON _ = Null
 
 setTripWaitTime :: Int -- ^ The timestamp to use as "now"
                 -> RDT.Trip -- ^ A trip with no (?) wait time
@@ -69,35 +73,40 @@ newtype ObaRoute = ObaRoute
 
 instance FromJSON ObaRoute where
   parseJSON (Object o) =
-    let route = RDT.Route <$> o .: "id" <*> return Nothing <*> 
+    let route = RDT.Route <$> o .: "id" <*> return Nothing <*>
                   o .: "shortName" <*> o .: "description" <*> return S.empty
     in  ObaRoute <$> route
 
+-- | Dummy instance to allow lens magic
+instance ToJSON ObaRoute where
+  toJSON _ = Null
+
 newtype ObaStop = ObaStop RDT.Stop
 
+-- * The main type that does the work of pulling apart the JSON blob from OBA
+-- and turning it into our RealtimeData types
+
 instance FromJSON ObaStop where
-  parseJSON v@(Object o) = do
-    -- get the status code and the timestamp; verify that the status code is 200
-    code <- o .: "code" :: Parser Int
+  parseJSON value = maybe empty return $ do
+    -- get and test result status code
+    code <- value ^? key "code" . _Integer
     guard $ code == 200
-    timestamp <- (`div` 1000) <$> o .: "currentTime" :: Parser Int
 
-    -- extract the sub-objects of interest; this is really ugly and there must be
-    -- a better way?
-    baseData <- getObject =<< getAttr "data" o
-    entryData <- getObject =<< getAttr "entry" baseData
+    -- get the timestamp from the returned data and convert it to seconds
+    timestamp <- (`div` 1000) . fromInteger <$> value ^? key "currentTime" . _Integer
 
-    tripsValue <- getAttr "arrivalsAndDepartures" entryData
-    routesValue <- getAttr "routes" =<< getObject =<<
-                     getAttr "references" baseData
+    -- grab the rest of the relevant data out of the JSON blob
+    _data <- value ^? key "data"
+    entry <- _data ^? key "entry"
 
-    let getStopId (String s) = return s
-        getStopId _ = empty
-    stopId <- getStopId =<< getAttr "stopId" entryData
+    tripsValue <- entry ^? key "arrivalsAndDepartures" . _Value
+    routesValue <- _data ^? key "references" . key "routes" . _Value
+
+    stopId <- entry ^? key "stopId" . _String
 
     -- now parse the lists of trips and routes
-    trips' <- fmap obaGetTrip <$> parseJSON tripsValue :: Parser [RDT.Trip]
-    routes <- fmap obaGetRoute <$> parseJSON routesValue :: Parser [RDT.Route]
+    trips' <- fmap obaGetTrip <$> tripsValue ^? _JSON :: Maybe [RDT.Trip]
+    routes <- fmap obaGetRoute <$> routesValue ^? _JSON :: Maybe [RDT.Route]
 
     -- add wait times to trips
     let trips = map (setTripWaitTime timestamp) trips'
@@ -119,12 +128,3 @@ instance FromJSON ObaStop where
         sortedRoutes = sortOn (^. RDT.earliestTrip) routesWithNotNullTrips
 
     return $ ObaStop $ RDT.Stop stopId "bar" sortedRoutes timestamp
-
-getAttr :: T.Text -> Object -> Parser Value
-getAttr key object = do
-  value <- object .: key :: Parser Value
-  return value
-
-getObject :: Value -> Parser Object
-getObject (Object o) = return o
-getObject _ = empty
