@@ -22,6 +22,7 @@ import qualified Control.Concurrent.ReadWriteVar as RWV
 import qualified Data.HashMap.Strict as HM
 import Monolith.Utility.Cache
 import Monolith.Backend.Services.StaticData
+import Monolith.Backend.Services.StaticData.ObaRest.Types
 import Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
 import Monolith.Backend.Services.RealtimeData.ObaRest.Config
 
@@ -38,7 +39,7 @@ stopsWithinRadius' config = do
   let getStops :: (Double, Double, Double) -> IO [Stop]
       getStops (lon, lat, radius) =
         let params = [("lon", show lon), ("lat", show lat), ("radius", show radius)]
-        in  jsonForRouteAndParams config "stops-for-location" Nothing params
+        in  map stopFrom <$> jsonForRouteAndParams config "stops-for-location" Nothing params
 
   cache <- newCache getStops :: IO (HashCache (Double, Double, Double) [Stop])
 
