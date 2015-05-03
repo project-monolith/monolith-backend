@@ -22,11 +22,14 @@ module Monolith.Backend.Services.StaticData.ObaRest where
 import Control.Exception
 import Control.Monad (guard, forM)
 import qualified Control.Concurrent.ReadWriteVar as RWV
-import Data.List (find, filter)
+import Data.List (find, filter, sortOn)
 import qualified Data.Text as T
 import qualified Data.HashMap.Strict as HM
 
-import Control.Lens (over, (^.), (^?), (^..))
+import Data.Geo.Coordinate (Coordinate, (<°>))
+import Data.Geo.Geodetic.Haversine (haversineD)
+
+import Control.Lens (over, set, (^.), (^?), (^..))
 import Data.Maybe (maybe)
 import Data.Aeson
 import Data.Aeson.Lens
@@ -91,4 +94,26 @@ stopsWithinRadiusOfStop'' config (stopId, radius) = do
         Just ts -> ts
         Nothing -> throwErr "unable to locate requested stop"
 
-  return $ StopVicinity thisStop radius restOfStops [] [] []
+      coordErr = throwErr "could not compute inter-stop distances; invalid coordinates?"
+
+  stopsWithDistances <- maybe coordErr return $
+    sortOn (^. stopDistanceFromHomeStop) <$>
+      mapM (addDistanceToHomeStop thisStop) restOfStops
+
+  return $ StopVicinity thisStop radius stopsWithDistances [] [] []
+
+-- | This function is used to compute the distance between two `Stop`s, and
+-- to annotate one of the `Stop` arguments with the result.
+addDistanceToHomeStop :: Stop -> Stop -> Maybe Stop
+addDistanceToHomeStop home this = do
+  homeC <- pointToCoordinate $ home ^. stopLocation
+  thisC <- pointToCoordinate $ this ^. stopLocation
+  let dist = haversineD homeC thisC
+  return $ set stopDistanceFromHomeStop (Just dist) this
+
+  where
+    pointToCoordinate :: Point -> Maybe Coordinate
+    pointToCoordinate point =
+      let lon = point ^. pointLon
+          lat = point ^. pointLat
+      in  lat <°> lon

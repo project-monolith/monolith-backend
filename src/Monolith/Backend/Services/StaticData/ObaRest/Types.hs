@@ -58,7 +58,7 @@ instance FromJSON [ObaStop] where
       let point = Point lon lat
 
       routeIds <- return $ stop ^.. key "routeIds" . values . _String
-      return $ Stop myId myName point myDirection routeIds
+      return $ Stop myId myName point myDirection routeIds Nothing
 
     -- now we need to change the route IDs to route "short names", aka
     -- the actual route numbers/names that we care about.
