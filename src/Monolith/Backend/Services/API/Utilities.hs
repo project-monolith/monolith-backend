@@ -31,13 +31,14 @@ import Data.Time.Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import Monolith.Backend.Services.RealtimeData.Types
 
-getTickerText :: UTCTime -> [Route] -> String
+getTickerText :: Int -> [Route] -> String
 getTickerText now = intercalate " " . map toTickerItem
   where
     toTickerItem route =
       let trips = route ^. routeTrips
+          nowTime = posixSecondsToUTCTime $ fromIntegral now
           waitForTimestamp t =
-            (round $ diffUTCTime (posixSecondsToUTCTime $ fromIntegral t) now) `div` 60
+            (round $ diffUTCTime (posixSecondsToUTCTime $ fromIntegral t) nowTime) `div` 60
           waits = map (waitForTimestamp . (^. tripArrival)) $ F.toList trips
           routeNum = route ^. routeNumber
       in  "Route " ++ T.unpack routeNum ++ " in " ++

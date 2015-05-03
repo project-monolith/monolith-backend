@@ -29,7 +29,6 @@ module Monolith.Backend.Services.RealtimeData.Types
 
   , Route (Route)
   , routeId
-  , earliestTrip
   , routeNumber
   , routeDesc
   , routeTrips
@@ -69,7 +68,6 @@ data Stop = Stop
 
 data Route = Route
   { _routeId :: !T.Text
-  , _earliestTrip :: !(Maybe Int) -- timestamp
   , _routeNumber :: !T.Text
   , _routeDesc :: !T.Text
   , _routeTrips :: !(S.Set Trip)

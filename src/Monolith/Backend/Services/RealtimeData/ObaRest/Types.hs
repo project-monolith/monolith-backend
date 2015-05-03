@@ -23,7 +23,7 @@ module Monolith.Backend.Services.RealtimeData.ObaRest.Types
 
 import Control.Applicative
 import Control.Monad (guard, forM)
-import Control.Lens (set, (^.), (^?))
+import Control.Lens (set, view, over, (^.), (^?))
 import Data.List
 import Data.Maybe (maybe)
 import qualified Data.Text as T
@@ -74,8 +74,8 @@ newtype ObaRoute = ObaRoute
 
 instance FromJSON ObaRoute where
   parseJSON (Object o) =
-    let route = RDT.Route <$> o .: "id" <*> return Nothing <*>
-                  o .: "shortName" <*> o .: "description" <*> return S.empty
+    let route = RDT.Route <$> o .: "id" <*>
+          o .: "shortName" <*> o .: "description" <*> return S.empty
     in  ObaRoute <$> route
 
 -- | Dummy instance to allow lens magic
@@ -113,19 +113,14 @@ instance FromJSON ObaStop where
     let trips = map (setTripWaitTime timestamp) trips'
 
     let routeMap =
-          foldr (\r@(RDT.Route routeId _ _ _ _) m -> HM.insert routeId r m) HM.empty routes
+          foldr (\r@(RDT.Route routeId _ _ _) m -> HM.insert routeId r m) HM.empty routes
 
-        f t@(RDT.Trip _ _ _ routeId _ _) m =
-          let g (RDT.Route id earliest num desc trips) =
-                let earliest' = case earliest of
-                      Just e -> Just $ min e (t ^. RDT.tripArrival)
-                      Nothing -> Just (t ^. RDT.tripArrival)
-                in  RDT.Route id earliest' num desc (S.insert t trips)
-          in  HM.adjust g routeId m
+        f t m = HM.adjust (over RDT.routeTrips (S.insert t)) (view RDT.tripRouteId t) m
 
         routesWithTrips = foldr f routeMap trips
-        routesWithNotNullTrips =
-          filter (not . S.null . (^. RDT.routeTrips)) $ HM.elems routesWithTrips
-        sortedRoutes = sortOn (^. RDT.earliestTrip) routesWithNotNullTrips
+        filterNullRoutes =
+          filter (not . S.null . (^. RDT.routeTrips)) . HM.elems
 
-    return $ ObaStop $ RDT.Stop stopId "bar" sortedRoutes timestamp
+        finalRoutes = filterNullRoutes routesWithTrips
+
+    return $ ObaStop $ RDT.Stop stopId "bar" finalRoutes timestamp

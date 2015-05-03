@@ -26,11 +26,14 @@ module Monolith.Backend.Services.API.Scotty
 import Control.Applicative
 import Control.Monad (forM)
 import Control.Monad.IO.Class
-import Control.Lens (over, (^.))
+import Control.Lens (view, over, (^.))
 import Control.Concurrent.Async
 import Web.Scotty
 import Network.Wai.Handler.Warp (Port)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import Data.List (sortOn)
+import Data.Maybe (maybe)
+import qualified Data.Set as S
 import Data.Time.Clock (getCurrentTime)
 import Monolith.Backend.Services.API
 import Monolith.Backend.Services.API.Utilities
@@ -49,11 +52,15 @@ getHandle realtime static port =
 -- | The number of trips to return (and the number of trips to skip for the
 -- ticker) by default.
 tripsCutoff :: Int
-tripsCutoff = 9
+tripsCutoff = 6
 
 -- | the default search radius for stops near location, in meters
 stopSearchRadius :: Double
 stopSearchRadius = 100.0
+
+-- | The default minimum wait time, beyond which trips are dropped
+minimumWaitTime :: Int
+minimumWaitTime = -1
 
 app :: RealtimeData -> SD.StaticData -> ScottyM ()
 app realtime static = do
@@ -61,21 +68,37 @@ app realtime static = do
 
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
-    nTrips <- param "n_trips" `rescue` const (return tripsCutoff)
+    nRoutes <- param "n_trips" `rescue` const (return tripsCutoff)
     stop <- liftIO $ incomingTripsForStop realtime stopId
-    let stop' = over stopRoutes (take nTrips) stop
+    let stop' = over stopRoutes (take nRoutes . sortByWaitTime . map filterTrips) stop
     json stop'
 
   get "/stops/:stop_id/ticker" $ do
     stopId <- param "stop_id"
-    nSkipTrips <- param "n_skip_trips" `rescue` const (return tripsCutoff)
+    nSkipRoutes <- param "n_skip_trips" `rescue` const (return tripsCutoff)
     stop <- liftIO $ incomingTripsForStop realtime stopId
-    let stop' = over stopRoutes (drop nSkipTrips) stop
-    now <- liftIO $ getCurrentTime
-    let tickerText = getTickerText now $ drop nSkipTrips $ stop ^. stopRoutes
+
+    let routes = drop nSkipRoutes $
+                 sortByWaitTime $
+                 map filterTrips $
+                 view stopRoutes stop
+
+        tickerText = getTickerText (stop ^. stopTimestamp) routes
     json tickerText
 
   get "/stops/:stop_id/vicinity" $ do
     stopId <- param "stop_id"
     radius <- param "radius" `rescue` const (return stopSearchRadius)
     json =<< liftIO (SD.stopsWithinRadiusOfStop static stopId radius)
+
+  where
+    filterTrips :: Route -> Route
+    filterTrips =
+      let waitFor (TripDue w) = w
+          waitFor (TripArrivesIn w) = w
+          getWaitTime = maybe (TripDue $ minimumWaitTime - 1) id . view tripWaitTime
+      in  over routeTrips (S.filter ((minimumWaitTime <=) . waitFor . getWaitTime))
+
+    sortByWaitTime :: [Route] -> [Route]
+    sortByWaitTime =
+      sortOn (view tripWaitTime . S.findMin . view routeTrips)
