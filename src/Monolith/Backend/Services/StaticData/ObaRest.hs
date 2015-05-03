@@ -21,35 +21,29 @@ module Monolith.Backend.Services.StaticData.ObaRest where
 
 import Control.Exception
 import Control.Monad (guard, forM)
-import qualified Control.Concurrent.ReadWriteVar as RWV
 import Data.List (find, filter, sortOn)
 import qualified Data.Text as T
-import qualified Data.HashMap.Strict as HM
 
-import Data.Geo.Coordinate (Coordinate, (<°>))
-import Data.Geo.Geodetic.Haversine (haversineD)
-
-import Control.Lens (over, set, (^.), (^?), (^..))
+import Control.Lens ((^.))
 import Data.Maybe (maybe)
 import Data.Aeson
-import Data.Aeson.Lens
 
 import Monolith.Utility.Cache
 import Monolith.Backend.Services.StaticData
-import Monolith.Backend.Services.StaticData.ObaRest.Types
+import Monolith.Backend.Services.StaticData.ObaRest.Utilities
 import Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
 import Monolith.Backend.Services.RealtimeData.ObaRest.Config
 
 newHandle :: ObaRestConfig -> IO StaticData
 newHandle config =
-  StaticData <$> stopsWithinRadius' config
+  StaticData <$> getStopForId' config
+             <*> stopsWithinRadius' config
              <*> stopsWithinRadiusOfStop' config
 
--- | Helper function for both the methods this service offers
-getStops :: ObaRestConfig -> (Double, Double, Double) -> IO [Stop]
-getStops config (lon, lat, radius) =
-  let params = [("lon", show lon), ("lat", show lat), ("radius", show radius)]
-  in  map stopFrom <$> jsonForRouteAndParams config "stops-for-location" Nothing params
+getStopForId' :: ObaRestConfig -> IO (StopId -> IO Stop)
+getStopForId' config = do
+  cache <- newCache (getStop config) :: IO (HashCache StopId Stop)
+  return $ flip cacheLookup cache
 
 -- | We're building in a perma-cache here because this is in theory static data
 -- that will only change once a month or even less often. This whole module
@@ -74,16 +68,11 @@ stopsWithinRadiusOfStop' config = do
 stopsWithinRadiusOfStop'' :: ObaRestConfig -> (StopId, Double) -> IO StopVicinity
 stopsWithinRadiusOfStop'' config (stopId, radius) = do
   let throwErr = throw . StaticDataException
-  value <-
-    jsonForRouteAndParams  config "stop" (Just (T.unpack stopId)) [("radius", show radius)] :: IO Value
+  value <- jsonForRouteAndParams config "stop" (Just (T.unpack stopId)) [] :: IO Value
 
-  (lon, lat) <- maybe (throwErr "could not parse stop data") return $ do
-    code <- value ^? key "code" . _Integer
-    guard $ code == 200
-
-    [lon, lat] <- forM ["lon", "lat"] $ \keyStr ->
-      value ^? key "data" . key "entry" . key keyStr . _Double
-    return (lon, lat)
+  homeStop <- getStop config stopId
+  let lon = homeStop ^. stopLocation ^. pointLon
+      lat = homeStop ^. stopLocation ^. pointLat
 
   stops <- getStops config (lon, lat, radius)
 
@@ -101,19 +90,3 @@ stopsWithinRadiusOfStop'' config (stopId, radius) = do
       mapM (addDistanceToHomeStop thisStop) restOfStops
 
   return $ StopVicinity thisStop radius stopsWithDistances [] [] []
-
--- | This function is used to compute the distance between two `Stop`s, and
--- to annotate one of the `Stop` arguments with the result.
-addDistanceToHomeStop :: Stop -> Stop -> Maybe Stop
-addDistanceToHomeStop home this = do
-  homeC <- pointToCoordinate $ home ^. stopLocation
-  thisC <- pointToCoordinate $ this ^. stopLocation
-  let dist = haversineD homeC thisC
-  return $ set stopDistanceFromHomeStop (Just dist) this
-
-  where
-    pointToCoordinate :: Point -> Maybe Coordinate
-    pointToCoordinate point =
-      let lon = point ^. pointLon
-          lat = point ^. pointLat
-      in  lat <°> lon

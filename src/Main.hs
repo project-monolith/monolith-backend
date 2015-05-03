@@ -37,8 +37,8 @@ config = OBA.ObaRestConfig "TEST" "http://api.pugetsound.onebusaway.org/api/wher
 
 main :: IO ()
 main = do
-  let oba = OBA.newHandle config
   obas <- OBAS.newHandle config
+  let oba = OBA.newHandle config obas
   cache <- CH.newRealtimeCache CH.defaultCacheConfig oba
   API async <- SCTY.getHandle cache obas 4567
   wait async

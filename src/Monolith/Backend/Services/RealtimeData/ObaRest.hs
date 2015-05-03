@@ -23,20 +23,24 @@ module Monolith.Backend.Services.RealtimeData.ObaRest
   ) where
 
 import Control.Exception
+import Control.Lens (view, set)
 import qualified Data.Text as T
 import qualified Monolith.Backend.Services.RealtimeData as RD
 import qualified Monolith.Backend.Services.RealtimeData.Types as RDT
 import Monolith.Backend.Services.RealtimeData.ObaRest.Types
 import Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
 import Monolith.Backend.Services.RealtimeData.ObaRest.Config
+import qualified Monolith.Backend.Services.StaticData as SD
 
 -- * Get a new handle
 
-newHandle :: ObaRestConfig -> RD.RealtimeData
-newHandle config = RD.RealtimeData $ incomingTripsForStop' config
+newHandle :: ObaRestConfig -> SD.StaticData -> RD.RealtimeData
+newHandle config static = RD.RealtimeData $ incomingTripsForStop' config static
 
-incomingTripsForStop' :: ObaRestConfig -> RD.StopID -> IO RDT.Stop
-incomingTripsForStop' config stopId = do
+incomingTripsForStop' :: ObaRestConfig -> SD.StaticData -> RD.StopID -> IO RDT.Stop
+incomingTripsForStop' config static stopId = do
   (ObaStop s) <- jsonForRouteAndParams config "arrivals-and-departures-for-stop"
     (Just $ T.unpack stopId) []
-  return s
+
+  myDesc <- view SD.stopName <$> SD.getStopForId static stopId
+  return $ set RDT.stopDesc myDesc s
