@@ -31,6 +31,7 @@ import Control.Concurrent.Async
 import Web.Scotty
 import Network.Wai.Handler.Warp (Port)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
+import Network.Wai.Middleware.Cors (simpleCors)
 import Data.List (sortOn)
 import Data.Maybe (maybe)
 import qualified Data.Set as S
@@ -65,6 +66,7 @@ minimumWaitTime = -1
 app :: RealtimeData -> SD.StaticData -> ScottyM ()
 app realtime static = do
   middleware logStdoutDev
+  middleware simpleCors
 
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
