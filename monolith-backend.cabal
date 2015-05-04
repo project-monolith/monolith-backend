@@ -28,20 +28,20 @@ executable monolith-backend
   main-is:             Main.hs
   other-modules:
     Monolith.Utility.Cache
-    Monolith.Backend.Services.API
-    Monolith.Backend.Services.API.Scotty
-    Monolith.Backend.Services.API.Utilities
-    Monolith.Backend.Services.RealtimeData
-    Monolith.Backend.Services.RealtimeData.Cache
-    Monolith.Backend.Services.RealtimeData.ObaRest
-    Monolith.Backend.Services.RealtimeData.Types
-    Monolith.Backend.Services.RealtimeData.ObaRest.Config
-    Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
-    Monolith.Backend.Services.RealtimeData.ObaRest.Types
-    Monolith.Backend.Services.StaticData
-    Monolith.Backend.Services.StaticData.Types
-    Monolith.Backend.Services.StaticData.ObaRest
-    Monolith.Backend.Services.StaticData.ObaRest.Utilities
+    Monolith.Services.API
+    Monolith.Services.API.Scotty
+    Monolith.Services.API.Utilities
+    Monolith.Services.RealtimeData
+    Monolith.Services.RealtimeData.Cache
+    Monolith.Services.RealtimeData.ObaRest
+    Monolith.Services.RealtimeData.Types
+    Monolith.Services.RealtimeData.ObaRest.Config
+    Monolith.Services.RealtimeData.ObaRest.HTTP
+    Monolith.Services.RealtimeData.ObaRest.Types
+    Monolith.Services.StaticData
+    Monolith.Services.StaticData.Types
+    Monolith.Services.StaticData.ObaRest
+    Monolith.Services.StaticData.ObaRest.Utilities
 
   -- other-extensions:
   build-depends:       base >=4.8 && <4.9, aeson >=0.8.0.2 && <0.9,

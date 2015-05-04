@@ -20,7 +20,7 @@
 -- | This is the interface for modules that provide realtime transit service
 -- information to other services in the Monolith backend. This service is
 -- specific to realtime data; static data should come from another service.
-module Monolith.Backend.Services.RealtimeData
+module Monolith.Services.RealtimeData
   ( RealtimeData(..)
   , RealtimeDataException(..)
   , StopID
@@ -29,7 +29,7 @@ module Monolith.Backend.Services.RealtimeData
 import Control.Exception
 import Data.Typeable
 import qualified Data.Text as T
-import Monolith.Backend.Services.RealtimeData.Types
+import Monolith.Services.RealtimeData.Types
 
 -- | General-purpose exception to throw when something goes wrong fetching
 -- real-time data.

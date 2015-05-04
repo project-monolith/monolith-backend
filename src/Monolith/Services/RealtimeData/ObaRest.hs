@@ -15,22 +15,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -}
 
--- | This service implements the `Monolith.Backend.Services.RealtimeData`
+-- | This service implements the `Monolith.Services.RealtimeData`
 -- interface. It fetches data from the One Bus Away REST API.
-module Monolith.Backend.Services.RealtimeData.ObaRest
+module Monolith.Services.RealtimeData.ObaRest
   ( newHandle
-  , module Monolith.Backend.Services.RealtimeData.ObaRest.Config
+  , module Monolith.Services.RealtimeData.ObaRest.Config
   ) where
 
 import Control.Exception
 import Control.Lens (view, set)
 import qualified Data.Text as T
-import qualified Monolith.Backend.Services.RealtimeData as RD
-import qualified Monolith.Backend.Services.RealtimeData.Types as RDT
-import Monolith.Backend.Services.RealtimeData.ObaRest.Types
-import Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
-import Monolith.Backend.Services.RealtimeData.ObaRest.Config
-import qualified Monolith.Backend.Services.StaticData as SD
+import qualified Monolith.Services.RealtimeData as RD
+import qualified Monolith.Services.RealtimeData.Types as RDT
+import Monolith.Services.RealtimeData.ObaRest.Types
+import Monolith.Services.RealtimeData.ObaRest.HTTP
+import Monolith.Services.RealtimeData.ObaRest.Config
+import qualified Monolith.Services.StaticData as SD
 
 -- * Get a new handle
 

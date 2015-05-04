@@ -17,7 +17,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Monolith.Backend.Services.StaticData.ObaRest.Utilities
+module Monolith.Services.StaticData.ObaRest.Utilities
   ( getStops
   , getStop
   , makeStop
@@ -35,9 +35,9 @@ import Data.Aeson.Lens
 import Data.Geo.Coordinate (Coordinate, (<°>))
 import Data.Geo.Geodetic.Haversine (haversineD)
 
-import Monolith.Backend.Services.StaticData
-import Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
-import Monolith.Backend.Services.RealtimeData.ObaRest.Config
+import Monolith.Services.StaticData
+import Monolith.Services.RealtimeData.ObaRest.HTTP
+import Monolith.Services.RealtimeData.ObaRest.Config
 
 -- | Get a list of stops from the OBA API for the given lon, lat, and radius.
 getStops :: ObaRestConfig -> (Double, Double, Double) -> IO [Stop]

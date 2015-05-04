@@ -20,7 +20,7 @@
 -- | This module contains the types and instances that pertain directly to
 -- the data served up by the REST API. They do not apply outside of that
 -- context.
-module Monolith.Backend.Services.RealtimeData.Types
+module Monolith.Services.RealtimeData.Types
   ( Stop (Stop)
   , stopId
   , stopDesc

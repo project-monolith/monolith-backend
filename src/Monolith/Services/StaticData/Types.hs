@@ -22,7 +22,7 @@
 -- | This module contains outward-facing types relevant to the static data
 -- service interface, which is basically responsible for providing info like
 -- which stops are where, which routes service which stops, and so on.
-module Monolith.Backend.Services.StaticData.Types
+module Monolith.Services.StaticData.Types
   ( -- * Exceptions
     StaticDataException(..)
 

@@ -23,12 +23,12 @@
 -- As we develop it, this interface should basically be a layer on top of
 -- GTFS (static) or equivalent; it should provide static data concerning the
 -- transit infrastructure.
-module Monolith.Backend.Services.StaticData
+module Monolith.Services.StaticData
   ( StaticData(..)
-  , module Monolith.Backend.Services.StaticData.Types
+  , module Monolith.Services.StaticData.Types
   ) where
 
-import Monolith.Backend.Services.StaticData.Types
+import Monolith.Services.StaticData.Types
 
 data StaticData = StaticData
   { getStopForId :: StopId -> IO Stop

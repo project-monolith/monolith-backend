@@ -26,11 +26,11 @@ import Control.Concurrent.Async
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as B
 import Data.Aeson (encode)
-import qualified Monolith.Backend.Services.RealtimeData.ObaRest as OBA
-import qualified Monolith.Backend.Services.RealtimeData.Cache as CH
-import qualified Monolith.Backend.Services.StaticData.ObaRest as OBAS
-import Monolith.Backend.Services.API (API(..))
-import qualified Monolith.Backend.Services.API.Scotty as SCTY
+import qualified Monolith.Services.RealtimeData.ObaRest as OBA
+import qualified Monolith.Services.RealtimeData.Cache as CH
+import qualified Monolith.Services.StaticData.ObaRest as OBAS
+import Monolith.Services.API (API(..))
+import qualified Monolith.Services.API.Scotty as SCTY
 
 config :: OBA.ObaRestConfig
 config = OBA.ObaRestConfig "TEST" "http://api.pugetsound.onebusaway.org/api/where/"

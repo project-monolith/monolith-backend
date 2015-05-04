@@ -17,9 +17,9 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
--- | This module implements the "Monolith.Backend.Services.API" interface with
+-- | This module implements the "Monolith.Services.API" interface with
 -- Scotty.
-module Monolith.Backend.Services.API.Scotty
+module Monolith.Services.API.Scotty
   ( getHandle
   ) where
 
@@ -36,11 +36,11 @@ import Data.List (sortOn)
 import Data.Maybe (maybe)
 import qualified Data.Set as S
 import Data.Time.Clock (getCurrentTime)
-import Monolith.Backend.Services.API
-import Monolith.Backend.Services.API.Utilities
-import Monolith.Backend.Services.RealtimeData
-import Monolith.Backend.Services.RealtimeData.Types
-import qualified Monolith.Backend.Services.StaticData as SD
+import Monolith.Services.API
+import Monolith.Services.API.Utilities
+import Monolith.Services.RealtimeData
+import Monolith.Services.RealtimeData.Types
+import qualified Monolith.Services.StaticData as SD
 
 -- | Create a new 'API'. This kicks off a new thread and starts up a
 -- Scotty in it. Presumably events coming into this web server will drive

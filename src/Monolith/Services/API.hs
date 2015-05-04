@@ -20,7 +20,7 @@
 -- | This module contains the interface for services which provide the actual
 -- API functionality of the Monolith backend: running a web server and
 -- responding to requests for various data.
-module Monolith.Backend.Services.API
+module Monolith.Services.API
   ( API(..)
   ) where
 

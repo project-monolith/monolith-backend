@@ -17,7 +17,7 @@
 
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
+module Monolith.Services.RealtimeData.ObaRest.HTTP
   ( jsonForRouteAndParams
   ) where
 
@@ -27,7 +27,7 @@ import Data.Typeable
 import Data.List (intersperse)
 import Data.ByteString.Lazy (pack)
 import Data.Aeson
-import Monolith.Backend.Services.RealtimeData.ObaRest.Config
+import Monolith.Services.RealtimeData.ObaRest.Config
 
 data HTTPException = HTTPException !String deriving (Show, Typeable)
 instance Exception HTTPException

@@ -17,7 +17,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Monolith.Backend.Services.StaticData.ObaRest where
+module Monolith.Services.StaticData.ObaRest where
 
 import Control.Exception
 import Control.Monad (guard, forM)
@@ -29,10 +29,10 @@ import Data.Maybe (maybe)
 import Data.Aeson
 
 import Monolith.Utility.Cache
-import Monolith.Backend.Services.StaticData
-import Monolith.Backend.Services.StaticData.ObaRest.Utilities
-import Monolith.Backend.Services.RealtimeData.ObaRest.HTTP
-import Monolith.Backend.Services.RealtimeData.ObaRest.Config
+import Monolith.Services.StaticData
+import Monolith.Services.StaticData.ObaRest.Utilities
+import Monolith.Services.RealtimeData.ObaRest.HTTP
+import Monolith.Services.RealtimeData.ObaRest.Config
 
 newHandle :: ObaRestConfig -> IO StaticData
 newHandle config =

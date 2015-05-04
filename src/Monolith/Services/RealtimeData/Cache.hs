@@ -17,11 +17,11 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
--- | This service implements the `Monolith.Backend.Services.RealtimeData`
+-- | This service implements the `Monolith.Services.RealtimeData`
 -- interface. It sits on another implementation of the same interface, and
 -- acts as a caching layer that allows previously computed results within
 -- some staleness threshold to be re-used.
-module Monolith.Backend.Services.RealtimeData.Cache
+module Monolith.Services.RealtimeData.Cache
   ( CacheConfig(..)
   , defaultCacheConfig
   , newRealtimeCache
@@ -33,8 +33,8 @@ import qualified Control.Concurrent.ReadWriteVar as RWV
 import qualified Data.HashMap.Strict as HM
 import Data.Time.Clock
 import Data.Aeson.TH (deriveJSON, defaultOptions)
-import Monolith.Backend.Services.RealtimeData
-import Monolith.Backend.Services.RealtimeData.Types
+import Monolith.Services.RealtimeData
+import Monolith.Services.RealtimeData.Types
 
 -- | Configuration type for this service
 data CacheConfig = CacheConfig

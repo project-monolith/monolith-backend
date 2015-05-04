@@ -17,7 +17,7 @@
 
 {-# LANGUAGE OverloadedStrings #-}
 
-module Monolith.Backend.Services.RealtimeData.ObaRest.Types
+module Monolith.Services.RealtimeData.ObaRest.Types
  ( ObaStop (..)
  ) where
 
@@ -32,7 +32,7 @@ import qualified Data.HashMap.Strict as HM
 import Data.Time.Clock
 import Data.Aeson
 import Data.Aeson.Lens
-import qualified Monolith.Backend.Services.RealtimeData.Types as RDT
+import qualified Monolith.Services.RealtimeData.Types as RDT
 
 -- * Wrapper types for parsing the realtime data types without overlapping
 -- instances

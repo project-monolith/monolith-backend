@@ -17,7 +17,7 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Monolith.Backend.Services.RealtimeData.ObaRest.Config
+module Monolith.Services.RealtimeData.ObaRest.Config
   ( ObaRestConfig (..)
   ) where
 

@@ -16,10 +16,10 @@
 -}
 
 -- | This module contains things that may be useful for any service that
--- implements the "Monolith.Backend.Services.API" interface, like (for
+-- implements the "Monolith.Services.API" interface, like (for
 -- instance) the function `getTickerText` which turns 'Route's into text
 -- for the ticker.
-module Monolith.Backend.Services.API.Utilities
+module Monolith.Services.API.Utilities
   ( getTickerText
   ) where
 
@@ -29,7 +29,7 @@ import Data.List
 import qualified Data.Text as T
 import Data.Time.Clock
 import Data.Time.Clock.POSIX (posixSecondsToUTCTime)
-import Monolith.Backend.Services.RealtimeData.Types
+import Monolith.Services.RealtimeData.Types
 
 getTickerText :: Int -> [Route] -> String
 getTickerText now = intercalate " " . map toTickerItem
