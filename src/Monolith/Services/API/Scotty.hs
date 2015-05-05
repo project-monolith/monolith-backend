@@ -33,8 +33,6 @@ import Network.Wai.Handler.Warp (Port)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Network.Wai.Middleware.Cors (simpleCors)
 import Data.List (sortOn)
-import Data.Maybe (maybe)
-import qualified Data.Set as S
 import Data.Time.Clock (getCurrentTime)
 import Monolith.Services.API
 import Monolith.Services.API.Utilities
@@ -50,10 +48,15 @@ getHandle :: RealtimeData -> SD.StaticData -> Port -> IO API
 getHandle realtime static port =
   API <$> async (scotty port (app realtime static))
 
--- | The number of trips to return (and the number of trips to skip for the
+-- | The number of routes to return (and the number of trips to skip for the
 -- ticker) by default.
-tripsCutoff :: Int
-tripsCutoff = 6
+routesCutoff :: Int
+routesCutoff = 6
+
+-- | The maximum number of trips to return per route. This applies to the trips
+-- and ticker methods.
+maxTrips :: Int
+maxTrips = 3
 
 -- | the default search radius for stops near location, in meters
 stopSearchRadius :: Double
@@ -70,14 +73,14 @@ app realtime static = do
 
   get "/stops/:stop_id/trips" $ do
     stopId <- param "stop_id"
-    nRoutes <- param "n_trips" `rescue` const (return tripsCutoff)
+    nRoutes <- param "n_trips" `rescue` const (return routesCutoff)
     stop <- liftIO $ incomingTripsForStop realtime stopId
     let stop' = over stopRoutes (take nRoutes . sortByWaitTime . map filterTrips) stop
     json stop'
 
   get "/stops/:stop_id/ticker" $ do
     stopId <- param "stop_id"
-    nSkipRoutes <- param "n_skip_trips" `rescue` const (return tripsCutoff)
+    nSkipRoutes <- param "n_skip_trips" `rescue` const (return routesCutoff)
     stop <- liftIO $ incomingTripsForStop realtime stopId
 
     let routes = drop nSkipRoutes $
@@ -98,9 +101,11 @@ app realtime static = do
     filterTrips =
       let waitFor (TripDue w) = w
           waitFor (TripArrivesIn w) = w
-          getWaitTime = maybe (TripDue $ minimumWaitTime - 1) id . view tripWaitTime
-      in  over routeTrips (S.filter ((minimumWaitTime <=) . waitFor . getWaitTime))
+          getWaitTime =
+            waitFor . maybe (TripDue $ minimumWaitTime - 1) id . view tripWaitTime
+      in  over routeTrips (take maxTrips . dropWhile ((minimumWaitTime >) . getWaitTime))
 
+    -- | minimum is a partial function!!!!! oh noes!
     sortByWaitTime :: [Route] -> [Route]
     sortByWaitTime =
-      sortOn (view tripWaitTime . S.findMin . view routeTrips)
+      sortOn (view tripWaitTime . minimum . view routeTrips)

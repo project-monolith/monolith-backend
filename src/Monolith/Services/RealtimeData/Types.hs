@@ -46,7 +46,6 @@ module Monolith.Services.RealtimeData.Types
   , WaitSource (Realtime, Scheduled)
   ) where
 
-import qualified Data.Set as S
 import qualified Data.Text as T
 import Data.Aeson
 import qualified Data.Aeson.TH as J
@@ -56,9 +55,6 @@ import qualified Control.Lens.TH as L
 -- a list of routes and upcoming trips for those routes. (and so on).
 -- Since this stop data is tied to a certain time, the `stopTimestamp`
 -- member records the time when this datum was generated.
---
--- We use `Set`s here so that there's no possibility for things to get
--- out of order. The correct ordering is important.
 data Stop = Stop
   { _stopId :: !T.Text
   , _stopDesc :: !T.Text
@@ -70,7 +66,7 @@ data Route = Route
   { _routeId :: !T.Text
   , _routeNumber :: !T.Text
   , _routeDesc :: !T.Text
-  , _routeTrips :: !(S.Set Trip)
+  , _routeTrips :: ![Trip]
   } deriving (Eq, Show)
 
 data TripWaitTime = TripDue Int | TripArrivesIn Int deriving (Eq, Ord, Show)

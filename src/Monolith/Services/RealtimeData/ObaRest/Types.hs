@@ -27,7 +27,6 @@ import Control.Lens (set, view, over, (^.), (^?))
 import Data.List
 import Data.Maybe (maybe)
 import qualified Data.Text as T
-import qualified Data.Set as S
 import qualified Data.HashMap.Strict as HM
 import Data.Time.Clock
 import Data.Aeson
@@ -75,7 +74,7 @@ newtype ObaRoute = ObaRoute
 instance FromJSON ObaRoute where
   parseJSON (Object o) =
     let route = RDT.Route <$> o .: "id" <*>
-          o .: "shortName" <*> o .: "description" <*> return S.empty
+          o .: "shortName" <*> o .: "description" <*> return []
     in  ObaRoute <$> route
 
 -- | Dummy instance to allow lens magic
@@ -115,12 +114,13 @@ instance FromJSON ObaStop where
     let routeMap =
           foldr (\r@(RDT.Route routeId _ _ _) m -> HM.insert routeId r m) HM.empty routes
 
-        f t m = HM.adjust (over RDT.routeTrips (S.insert t)) (view RDT.tripRouteId t) m
+        f t m = HM.adjust (over RDT.routeTrips (t :)) (view RDT.tripRouteId t) m
 
         routesWithTrips = foldr f routeMap trips
+        sortTrips = map (over RDT.routeTrips (sortOn (^. RDT.tripArrival)))
         filterNullRoutes =
-          filter (not . S.null . (^. RDT.routeTrips)) . HM.elems
+          filter (not . null . (^. RDT.routeTrips)) . HM.elems
 
-        finalRoutes = filterNullRoutes routesWithTrips
+        finalRoutes = sortTrips $ filterNullRoutes routesWithTrips
 
     return $ ObaStop $ RDT.Stop stopId "bar" finalRoutes timestamp
