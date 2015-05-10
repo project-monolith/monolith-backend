@@ -50,6 +50,7 @@ import qualified Data.Text as T
 import Data.Aeson
 import qualified Data.Aeson.TH as J
 import qualified Control.Lens.TH as L
+import Monolith.Utility.JSON (fixFieldName)
 
 -- | This type encapsulates some information about a stop, and contains
 -- a list of routes and upcoming trips for those routes. (and so on).
@@ -86,12 +87,12 @@ data Trip = Trip
 
 data WaitSource = Realtime | Scheduled deriving (Eq, Ord, Show)
 
-jsonOptions = J.defaultOptions { J.fieldLabelModifier = tail }
+jsonOptions = J.defaultOptions { J.fieldLabelModifier = fixFieldName }
 
-$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''WaitSource)
-$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''Trip)
-$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''Route)
-$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = tail } ''Stop)
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = fixFieldName } ''WaitSource)
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = fixFieldName } ''Trip)
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = fixFieldName } ''Route)
+$(J.deriveToJSON J.defaultOptions { J.fieldLabelModifier = fixFieldName } ''Stop)
 
 L.makeLenses ''Stop
 L.makeLenses ''Route

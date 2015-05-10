@@ -58,6 +58,7 @@ import Data.Typeable
 import qualified Data.Text as T
 import qualified Data.Aeson.TH as JTH
 import Control.Lens.TH (makeLenses)
+import Monolith.Utility.JSON (fixFieldName)
 
 data StaticDataException = StaticDataException !String deriving (Show, Typeable)
 instance Exception StaticDataException
@@ -67,7 +68,7 @@ data Point = Point
   , _pointLat :: !Double
   } deriving Show
 
-$(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = tail } ''Point)
+$(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = fixFieldName } ''Point)
 makeLenses ''Point
 
 type Route = T.Text
@@ -82,7 +83,7 @@ data Stop = Stop
   , _stopDistanceFromHomeStop :: !(Maybe Double)
   } deriving Show
 
-$(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = tail } ''Stop)
+$(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = fixFieldName } ''Stop)
 makeLenses ''Stop
 
 data StopVicinity = StopVicinity
@@ -94,5 +95,5 @@ data StopVicinity = StopVicinity
   , _vicinityEvents :: [()]
   } deriving Show
 
-$(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = tail } ''StopVicinity)
+$(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = fixFieldName } ''StopVicinity)
 makeLenses ''StopVicinity
