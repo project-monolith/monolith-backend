@@ -82,43 +82,117 @@ different comparator).
 
 ```json
 {
-    "stopId": "1_300",
-    "stopTimestamp": 1429740287,
-    "stopDesc": "bar",
-    "stopRoutes": [{
-        "earliestTrip": 1429740562,
-        "routeId": "1_100068",
-        "routeNumber": "177",
-        "routeTrips": [{
-            "tripArrival": 1429740562,
-            "tripRouteId": "1_100068",
-            "tripWaitTime": 5,
-            "tripHeadSign": "FEDERAL WAY, 320TH P&R VIA I-5",
-            "tripId": "1_28152633",
-            "tripWaitSource": "Scheduled"
-        }],
-        "routeDesc": "Federal Way P&R Via I-5"
-    }, {
-        "earliestTrip": 1429740840,
-        "routeId": "40_577",
-        "routeNumber": "577",
-        "routeTrips": [{
-            "tripArrival": 1429740840,
-            "tripRouteId": "40_577",
-            "tripWaitTime": 9,
-            "tripHeadSign": "Federal Way",
-            "tripId": "40_5893734",
-            "tripWaitSource": "Realtime"
+    "routes": [{
+        "trips": [{
+            "waitSource": "Scheduled",
+            "routeId": "1_100256",
+            "id": "1_26432294",
+            "arrival": 1431302070,
+            "headSign": "NORTHGATE EASTLAKE",
+            "waitTime": "DUE"
         }, {
-            "tripArrival": 1429741080,
-            "tripRouteId": "40_577",
-            "tripWaitTime": 13,
-            "tripHeadSign": "Federal Way",
-            "tripId": "40_5893757",
-            "tripWaitSource": "Realtime"
+            "waitSource": "Realtime",
+            "routeId": "1_100256",
+            "id": "1_26432295",
+            "arrival": 1431303870,
+            "headSign": "NORTHGATE EASTLAKE",
+            "waitTime": 30
         }],
-        "routeDesc": ""
-    }]
+        "id": "1_100256",
+        "number": "66",
+        "desc": "Northgate TC to U-District to Downtown Seattle"
+    }, {
+        "trips": [{
+            "waitSource": "Realtime",
+            "routeId": "1_100210",
+            "id": "1_21672722",
+            "arrival": 1431302364,
+            "headSign": "DOWNTOWN SEATTLE N BEACON HILL",
+            "waitTime": 4
+        }, {
+            "waitSource": "Realtime",
+            "routeId": "1_100210",
+            "id": "1_21672723",
+            "arrival": 1431302703,
+            "headSign": "DOWNTOWN SEATTLE N BEACON HILL",
+            "waitTime": 10
+        }, {
+            "waitSource": "Realtime",
+            "routeId": "1_100210",
+            "id": "1_21672724",
+            "arrival": 1431303563,
+            "headSign": "DOWNTOWN SEATTLE N BEACON HILL",
+            "waitTime": 24
+        }],
+        "id": "1_100210",
+        "number": "36",
+        "desc": "Othello Stn - Beacon Hill - Downtown"
+    }, {
+        "trips": [{
+            "waitSource": "Realtime",
+            "routeId": "1_100219",
+            "id": "1_18921744",
+            "arrival": 1431302386,
+            "headSign": "E QUEEN ANNE SEATTLE CENTER E",
+            "waitTime": 5
+        }],
+        "id": "1_100219",
+        "number": "4",
+        "desc": "E QA - Downtown - Judkins Pk"
+    }, {
+        "trips": [{
+            "waitSource": "Realtime",
+            "routeId": "1_100089",
+            "id": "1_25931793",
+            "arrival": 1431302633,
+            "headSign": "W QUEEN ANNE SEATTLE CENTER W",
+            "waitTime": 9
+        }],
+        "id": "1_100089",
+        "number": "2",
+        "desc": "W QA - Downtown - Madrona Pk"
+    }, {
+        "trips": [{
+            "waitSource": "Realtime",
+            "routeId": "1_102581",
+            "id": "1_24666412",
+            "arrival": 1431302722,
+            "headSign": "BALLARD UPTOWN",
+            "waitTime": 10
+        }, {
+            "waitSource": "Realtime",
+            "routeId": "1_102581",
+            "id": "1_24666413",
+            "arrival": 1431303500,
+            "headSign": "BALLARD UPTOWN",
+            "waitTime": 23
+        }],
+        "id": "1_102581",
+        "number": "D Line",
+        "desc": "Seattle Blue Ridge to Crown Hill to Ballard to Sea"
+    }, {
+        "trips": [{
+            "waitSource": "Scheduled",
+            "routeId": "1_102615",
+            "id": "1_25513812",
+            "arrival": 1431302768,
+            "headSign": "AURORA VILLAGE TRANSIT CENTER",
+            "waitTime": 11
+        }, {
+            "waitSource": "Scheduled",
+            "routeId": "1_102615",
+            "id": "1_25513832",
+            "arrival": 1431303668,
+            "headSign": "AURORA VILLAGE TRANSIT CENTER",
+            "waitTime": 26
+        }],
+        "id": "1_102615",
+        "number": "E Line",
+        "desc": "Aurora Village to Downtown Seattle"
+    }],
+    "id": "1_578",
+    "timestamp": 1431302097,
+    "desc": "3rd Ave & Pike St"
 }
 ```
 ### GET /stops/{stop_id}/ticker
@@ -150,11 +224,11 @@ Intended for use by the map view in the front end.
 #### Example
 ```json
 {
-    "vicinityRadius": 70,
-    "vicinityHomeStop": {
-        "stopName": "3rd Ave & Pike St",
-        "stopId": "1_578",
-        "stopRoutes": [
+    "radius": 100,
+    "bikeShares": [],
+    "carShares": [],
+    "homeStop": {
+        "routes": [
             "1",
             "2",
             "3",
@@ -174,31 +248,18 @@ Intended for use by the map view in the front end.
             "D Line",
             "E Line"
         ],
-        "stopDirection": "NW",
-        "stopLocation": {
-            "pointLon": -122.338173,
-            "pointLat": 47.61029
-        }
+        "distanceFromHomeStop": null,
+        "location": {
+            "lat": 47.61029,
+            "lon": -122.338173
+        },
+        "direction": "NW",
+        "name": "3rd Ave & Pike St",
+        "id": "1_578"
     },
-    "vicinityNearbyStops": [{
-        "stopName": "Pine Street Island & 3rd Ave",
-        "stopId": "1_1111",
-        "stopRoutes": [
-            "7",
-            "11",
-            "43",
-            "49",
-            "84"
-        ],
-        "stopDirection": "W",
-        "stopLocation": {
-            "pointLon": -122.338554,
-            "pointLat": 47.610844
-        }
-    }, {
-        "stopName": "3rd Ave & Pike St",
-        "stopId": "1_431",
-        "stopRoutes": [
+    "events": [],
+    "nearbyStops": [{
+        "routes": [
             "5",
             "15",
             "21",
@@ -222,15 +283,196 @@ Intended for use by the map view in the front end.
             "D Line",
             "E Line"
         ],
-        "stopDirection": "SE",
-        "stopLocation": {
-            "pointLon": -122.337959,
-            "pointLat": 47.609791
-        }
-    }],
-    "vicinityBikeShares": [],
-    "vicinityCarShares": [],
-    "vicinityEvents": []
+        "distanceFromHomeStop": 57.72667214405003,
+        "location": {
+            "lat": 47.609791,
+            "lon": -122.337959
+        },
+        "direction": "SE",
+        "name": "3rd Ave & Pike St",
+        "id": "1_431"
+    }, {
+        "routes": [
+            "7",
+            "11",
+            "43",
+            "49",
+            "84"
+        ],
+        "distanceFromHomeStop": 67.86318808561133,
+        "location": {
+            "lat": 47.610844,
+            "lon": -122.338554
+        },
+        "direction": "W",
+        "name": "Pine Street Island & 3rd Ave",
+        "id": "1_1111"
+    }, {
+        "routes": [
+            "10",
+            "11",
+            "43",
+            "49",
+            "143",
+            "157",
+            "158",
+            "159",
+            "179",
+            "192",
+            "577"
+        ],
+        "distanceFromHomeStop": 91.00187462586949,
+        "location": {
+            "lat": 47.611103,
+            "lon": -122.338028
+        },
+        "direction": "W",
+        "name": "Pine St & 4th Ave",
+        "id": "1_1120"
+    }, {
+        "routes": [
+            "590",
+            "592",
+            "594",
+            "595"
+        ],
+        "distanceFromHomeStop": 92.02745562060316,
+        "location": {
+            "lat": 47.610791,
+            "lon": -122.337195
+        },
+        "direction": "NW",
+        "name": "4th / Pike - drop off only",
+        "id": "3_13217"
+    }, {
+        "routes": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "7",
+            "13",
+            "14",
+            "16",
+            "17",
+            "18",
+            "25",
+            "27",
+            "33",
+            "36",
+            "40",
+            "66",
+            "70",
+            "82",
+            "83",
+            "84"
+        ],
+        "distanceFromHomeStop": 99.661037403426,
+        "location": {
+            "lat": 47.610973,
+            "lon": -122.339035
+        },
+        "direction": "SE",
+        "name": "3rd Ave & Pine St",
+        "id": "1_430"
+    }, {
+        "routes": [
+            "402",
+            "405",
+            "410",
+            "412",
+            "413",
+            "415",
+            "416",
+            "417",
+            "421",
+            "422",
+            "424",
+            "425",
+            "435",
+            "510",
+            "511",
+            "512",
+            "513"
+        ],
+        "distanceFromHomeStop": 100.13199967637266,
+        "location": {
+            "lat": 47.610948,
+            "lon": -122.33726
+        },
+        "direction": "NW",
+        "name": "4th Ave and Pike St",
+        "id": "29_2976"
+    }, {
+        "routes": [
+            "41",
+            "64",
+            "71",
+            "72",
+            "73",
+            "106",
+            "111",
+            "114",
+            "143",
+            "150",
+            "177",
+            "178",
+            "190",
+            "212",
+            "212",
+            "214",
+            "217",
+            "252",
+            "257",
+            "268",
+            "311",
+            "545",
+            "550",
+            "554"
+        ],
+        "distanceFromHomeStop": 100.80691210829458,
+        "location": {
+            "lat": 47.61095,
+            "lon": -122.33725
+        },
+        "direction": "NW",
+        "name": "4th Ave & Pike St",
+        "id": "1_700"
+    }, {
+        "routes": [
+            "5",
+            "16",
+            "17",
+            "18",
+            "21",
+            "24",
+            "25",
+            "26",
+            "28",
+            "33",
+            "37",
+            "40",
+            "55",
+            "56",
+            "57",
+            "116",
+            "118",
+            "119",
+            "120",
+            "124",
+            "304",
+            "355",
+            "994"
+        ],
+        "distanceFromHomeStop": 110.71593996723283,
+        "location": {
+            "lat": 47.611137,
+            "lon": -122.338951
+        },
+        "direction": "NW",
+        "name": "3rd Ave & Pine St",
+        "id": "1_590"
+    }]
 }
 ```
 
