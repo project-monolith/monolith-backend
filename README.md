@@ -8,10 +8,29 @@ don't get mad at us.
 
 ## Getting it, building and running it
 
-You will need to get the latest ghc and cabal-install, both of which are 
-available in homebrew. We are using ghc 7.10.1 and cabal 1.22.0.0, so make
-sure that you have recently run `brew update` or are otherwise up to date
-using your package manager of choice. Then, to build and run it in place:
+### ghc and cabal-install
+
+You will need `ghc` and `cabal-install` to build the monolith
+backend. On Mac OS X Yosemite, both these things can be obtained very easily
+with the following command, assuming you have homebrew installed:
+
+    brew install ghc cabal-install
+
+As newer versions of `ghc` (the Haskell compiler) and `cabal-install` (a tool
+for installing and building packages) become available, they will probably
+work just fine with the monolith backend. The versions in use as of this writing
+were `ghc` 7.10.1 and `cabal-install` 1.22.0.0.
+
+If you are using
+an operating system whose default Haskell packages are not up-to-date (like
+Ubuntu, unfortunately), then you will need to find some other way of getting
+`ghc` and `cabal-install`. The website for the former offers easy-to-install linux
+binaries, and the github repo for the latter includes a build/install script.
+
+### monolith-backend
+
+Once you have `ghc` and `cabal-install`, getting the monolith backend and
+building it is easy:
 
     git clone git@github.com:project-monolith/monolith-backend.git
     cd monolith-backend
@@ -23,11 +42,7 @@ using your package manager of choice. Then, to build and run it in place:
 
 Ask @mdunsmuir if you run into problems getting it to work, or you can check
 out the .travis.yml file to see a slightly different build method that may
-work better for you. If you are using
-an operating system whose default Haskell packages are not up-to-date (like
-Ubuntu, unfortunately), then you will need to find some other way of getting
-ghc and cabal. The website for the former offers easy-to-install linux
-binaries, and the github repo for the latter includes a build/install script.
+work better for you.
 
 Better build/deploy options coming soon. I am currently planning to distribute
 it as a packaged binary for whatever Linux environment we end up running on.
