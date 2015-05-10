@@ -18,8 +18,9 @@ with the following command, assuming you have homebrew installed:
 
 As newer versions of `ghc` (the Haskell compiler) and `cabal-install` (a tool
 for installing and building packages) become available, they will probably
-work just fine with the monolith backend. The versions in use as of this writing
-were `ghc` 7.10.1 and `cabal-install` 1.22.0.0.
+work just fine with the monolith backend until the next big change in the same
+vein as the applicative-monad proposal in 7.10. The versions in use as of this
+writing were `ghc` 7.10.1 and `cabal-install` 1.22.0.0.
 
 If you are using
 an operating system whose default Haskell packages are not up-to-date (like
