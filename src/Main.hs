@@ -26,6 +26,8 @@ import Control.Concurrent.Async
 import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as B
 import Data.Aeson (encode)
+import System.Remote.Monitoring (forkServer)
+
 import qualified Monolith.Services.RealtimeData.ObaRest as OBA
 import qualified Monolith.Services.RealtimeData.Cache as CH
 import qualified Monolith.Services.StaticData.ObaRest as OBAS
@@ -37,6 +39,7 @@ config = OBA.ObaRestConfig "TEST" "http://api.pugetsound.onebusaway.org/api/wher
 
 main :: IO ()
 main = do
+  forkServer "localhost" 8000
   obas <- OBAS.newHandle config
   let oba = OBA.newHandle config obas
   cache <- CH.newRealtimeCache CH.defaultCacheConfig oba
