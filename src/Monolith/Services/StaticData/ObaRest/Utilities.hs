@@ -26,8 +26,9 @@ module Monolith.Services.StaticData.ObaRest.Utilities
   ) where
 
 import Control.Exception (throwIO)
-import Control.Monad (guard, join)
+import Control.Monad (guard, join, forM)
 import Control.Lens (view, set, (^.), (^?), (^..))
+import Data.List (sortOn)
 import qualified Data.Text as T
 import qualified Data.HashMap.Strict as HM
 import Data.Aeson
@@ -43,6 +44,7 @@ import Monolith.Services.RealtimeData.ObaRest.Config
 getStops :: ObaRestConfig -> (Double, Double, Double) -> IO [Stop]
 getStops config (lon, lat, radius) = do
   let params = [("lon", show lon), ("lat", show lat), ("radius", show radius)]
+      maybeQueryCoord = lat <°> lon
   value <- jsonForRouteAndParams config "stops-for-location" Nothing params :: IO Value
 
   maybe (throwIO $ StaticDataException "failed to get stop data in getStops") return $ do
@@ -50,19 +52,33 @@ getStops config (lon, lat, radius) = do
     guard $ code == 200
     stopValues <- return $ value ^.. key "data" . key "list" . values
     routesValue <- value ^? key "data" . key "references" . key "routes"
-    mapM (flip makeStop routesValue) stopValues
+
+    stops <- forM stopValues $ \stopValue -> do
+      stop <- makeStop stopValue routesValue
+      Point stopLon stopLat <- stop ^? stopLocation
+      coord <- stopLat <°> stopLon
+      queryCoord <- maybeQueryCoord
+      return $ set stopDistance (Just (haversineD coord queryCoord)) stop
+
+    -- sort by distance from the query point
+    -- it's unclear whether OBA's API guarantees this ordering
+    let distances = map (^. stopDistance) stops
+        zipped = zip distances stops
+    return $ map snd $ sortOn fst zipped
 
 -- | Get a `Stop` for the given ID from the OBA API.
 getStop :: ObaRestConfig -> StopId -> IO Stop
 getStop config stopId = do
   value <- jsonForRouteAndParams config "stop" (Just (T.unpack stopId)) [] :: IO Value
 
+  let thrower = throwIO $ StaticDataException "failed to get stop data in getStop"
   maybe (throwIO $ StaticDataException "failed to get stop data in getStop") return $ do
     code <- value ^? key "code" . _Integer
     guard $ code == 200
     stopValue <- value ^? key "data" . key "entry"
     routesValue <- value ^? key "data" . key "references" . key "routes"
     makeStop stopValue routesValue
+
 
 -- | with a "stop blob" `Value` and a "routes blob" `Value`, make a new `Stop`.
 makeStop :: Value -> Value -> Maybe Stop
@@ -99,7 +115,7 @@ addDistanceToHomeStop home this = do
   homeC <- pointToCoordinate $ home ^. stopLocation
   thisC <- pointToCoordinate $ this ^. stopLocation
   let dist = haversineD homeC thisC
-  return $ set stopDistanceFromHomeStop (Just dist) this
+  return $ set stopDistance (Just dist) this
 
   where
     pointToCoordinate :: Point -> Maybe Coordinate

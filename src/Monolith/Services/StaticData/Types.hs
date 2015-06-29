@@ -41,7 +41,7 @@ module Monolith.Services.StaticData.Types
   , stopLocation
   , stopDirection
   , stopRoutes
-  , stopDistanceFromHomeStop
+  , stopDistance
 
     -- * Stop vicinity data type and lenses
   , StopVicinity(..)
@@ -80,7 +80,7 @@ data Stop = Stop
   , _stopLocation :: !Point
   , _stopDirection :: !T.Text
   , _stopRoutes :: ![Route]
-  , _stopDistanceFromHomeStop :: !(Maybe Double)
+  , _stopDistance :: !(Maybe Double)
   } deriving Show
 
 $(JTH.deriveToJSON JTH.defaultOptions { JTH.fieldLabelModifier = fixFieldName } ''Stop)

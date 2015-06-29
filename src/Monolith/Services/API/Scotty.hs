@@ -75,8 +75,15 @@ app realtime static = do
     stopId <- param "stop_id"
     nRoutes <- param "n_trips" `rescue` const (return routesCutoff)
     stop <- liftIO $ incomingTripsForStop realtime stopId
-    let stop' = over stopRoutes (take nRoutes . sortByWaitTime . map filterTrips) stop
-    json stop'
+    json $ processStop nRoutes stop
+
+  get "/stops/nearby" $ do
+    lon <- param "longitude"
+    lat <- param "latitude"
+    radius <- param "radius" `rescue` const (return stopSearchRadius)    
+    nRoutes <- param "n_trips" `rescue` const (return routesCutoff)
+    stops <- liftIO $ incomingTripsNearLocation realtime (lon, lat) radius
+    json $ map (processStop nRoutes) stops
 
   get "/stops/:stop_id/ticker" $ do
     stopId <- param "stop_id"
@@ -97,6 +104,13 @@ app realtime static = do
     json =<< liftIO (SD.stopsWithinRadiusOfStop static stopId radius)
 
   where
+    processStop :: Int -> Stop -> Stop
+    processStop nRoutes =
+      over stopRoutes (take nRoutes . sortByWaitTime . filterRoutes . map filterTrips)
+
+    filterRoutes :: [Route] -> [Route]
+    filterRoutes = filter (not . null . (^. routeTrips))
+
     filterTrips :: Route -> Route
     filterTrips =
       let waitFor (TripDue w) = w

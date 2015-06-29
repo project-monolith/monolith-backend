@@ -23,7 +23,7 @@ module Monolith.Services.RealtimeData.ObaRest
   ) where
 
 import Control.Exception
-import Control.Lens (view, set)
+import Control.Lens (view, set, (^.))
 import qualified Data.Text as T
 import qualified Monolith.Services.RealtimeData as RD
 import qualified Monolith.Services.RealtimeData.Types as RDT
@@ -31,11 +31,15 @@ import Monolith.Services.RealtimeData.ObaRest.Types
 import Monolith.Services.RealtimeData.ObaRest.HTTP
 import Monolith.Services.RealtimeData.ObaRest.Config
 import qualified Monolith.Services.StaticData as SD
+import Monolith.Services.RealtimeData.Utilities (incomingTripsNearLocationImpl)
 
 -- * Get a new handle
 
 newHandle :: ObaRestConfig -> SD.StaticData -> RD.RealtimeData
-newHandle config static = RD.RealtimeData $ incomingTripsForStop' config static
+newHandle config static = RD.RealtimeData itfs itnl
+  where
+    itfs = incomingTripsForStop' config static
+    itnl = incomingTripsNearLocationImpl static itfs
 
 incomingTripsForStop' :: ObaRestConfig -> SD.StaticData -> RD.StopID -> IO RDT.Stop
 incomingTripsForStop' config static stopId = do

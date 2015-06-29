@@ -86,7 +86,7 @@ stopsWithinRadiusOfStop'' config (stopId, radius) = do
       coordErr = throwErr "could not compute inter-stop distances; invalid coordinates?"
 
   stopsWithDistances <- maybe coordErr return $
-    sortOn (^. stopDistanceFromHomeStop) <$>
+    sortOn (^. stopDistance) <$>
       mapM (addDistanceToHomeStop thisStop) restOfStops
 
   return $ StopVicinity thisStop radius stopsWithDistances [] [] []

@@ -42,6 +42,6 @@ main = do
   forkServer "localhost" 8000
   obas <- OBAS.newHandle config
   let oba = OBA.newHandle config obas
-  cache <- CH.newRealtimeCache CH.defaultCacheConfig oba
+  cache <- CH.newRealtimeCache CH.defaultCacheConfig oba obas
   API async <- SCTY.getHandle cache obas 4567
   wait async

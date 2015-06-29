@@ -39,7 +39,7 @@ instance Exception RealtimeDataException
 type StopID = T.Text
 
 -- | Handle for a real-time data service.
-newtype RealtimeData = RealtimeData
+data RealtimeData = RealtimeData
   { -- | Get a 'Stop' object with real-time trip data for the given stop ID.
     incomingTripsForStop :: StopID -> IO Stop
-  }
+  , incomingTripsNearLocation :: (Double, Double) -> Double -> IO [Stop] }

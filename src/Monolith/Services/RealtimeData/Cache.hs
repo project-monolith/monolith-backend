@@ -35,6 +35,8 @@ import Data.Time.Clock
 import Data.Aeson.TH (deriveJSON, defaultOptions)
 import Monolith.Services.RealtimeData
 import Monolith.Services.RealtimeData.Types
+import Monolith.Services.RealtimeData.Utilities (incomingTripsNearLocationImpl)
+import Monolith.Services.StaticData (StaticData)
 
 -- | Configuration type for this service
 data CacheConfig = CacheConfig
@@ -48,9 +50,11 @@ defaultCacheConfig :: CacheConfig
 defaultCacheConfig = CacheConfig { expirationTime = 60 }
 
 -- | Create a new Cache service wrapping another realtime data service.
-newRealtimeCache :: CacheConfig -> RealtimeData -> IO RealtimeData
-newRealtimeCache (CacheConfig expTime) dataService =
-  RealtimeData <$> incomingTripsForStop' expTime dataService
+newRealtimeCache :: CacheConfig -> RealtimeData -> StaticData -> IO RealtimeData
+newRealtimeCache (CacheConfig expTime) dataService static = do
+  itfs <- incomingTripsForStop' expTime dataService
+  let itnl = incomingTripsNearLocationImpl static itfs
+  return $ RealtimeData itfs itnl
 
 type RWMap = RWV.RWVar (HM.HashMap StopID (UTCTime, Stop))
 
