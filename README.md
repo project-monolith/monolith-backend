@@ -28,6 +28,14 @@ Ubuntu, unfortunately), then you will need to find some other way of getting
 `ghc` and `cabal-install`. The website for the former offers easy-to-install linux
 binaries, and the github repo for the latter includes a build/install script.
 
+Ubuntu:
+
+    sudo add-apt-repository -y ppa:hvr/ghc
+    sudo apt-get update
+    sudo apt-get install ghc-7.10.1 cabal-1.22
+
+Then, add `/opt/ghc/7.10.1/bin` to the `$PATH` of the enviroment.
+
 ### monolith-backend
 
 Once you have `ghc` and `cabal-install`, getting the monolith backend and
